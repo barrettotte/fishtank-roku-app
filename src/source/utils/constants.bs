@@ -1,0 +1,38 @@
+' App-wide constants
+
+' App version displayed in the AboutDialog
+const APP_VERSION = "0.1.0"
+
+' Base URL for all REST API calls
+const API_BASE_URL = "https://api.fishtank.live/v1"
+
+' Default stream server for HLS playback and thumbnails
+const STREAMS_SERVER_DEFAULT = "streams-f.fishtank.live"
+
+' CDN base URL for static assets like map images
+const CDN_BASE_URL = "https://cdn.fishtank.live"
+
+' HLS stream URL template pieces
+const HLS_PATH_PREFIX = "/hls/live+"
+const HLS_INDEX_FILE = "/index.m3u8"
+
+' Stream quality parameter values for the HLS URL
+const QUALITY_LOW = "minbps"
+const QUALITY_MEDIUM = "2mbps"
+const QUALITY_HIGH = "maxbps"
+
+' Default quality to use on first launch
+const QUALITY_DEFAULT = QUALITY_HIGH
+
+' Registry section name for storing auth tokens
+const REGISTRY_SECTION = "FishtankAuth"
+
+' Registry key names
+const REGISTRY_ACCESS_TOKEN = "access_token"
+const REGISTRY_LIVE_STREAM_TOKEN = "live_stream_token"
+
+' How often to refresh camera thumbnails (in seconds)
+const THUMBNAIL_REFRESH_INTERVAL = 30
+
+' Current Fishtank season number (used for map image URLs)
+const CURRENT_SEASON = 5

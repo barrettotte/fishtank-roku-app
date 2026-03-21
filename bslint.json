@@ -1,0 +1,14 @@
+{
+  "rules": {
+    "assign-all-paths": "error",
+    "unsafe-path-loop": "error",
+    "unsafe-iterators": "error",
+    "unreachable-code": "error",
+    "case-sensitivity": "warn",
+    "no-print": "off",
+    "no-todo": "off",
+    "no-stop": "warn"
+  },
+  "globals": ["args"],
+  "ignores": []
+}

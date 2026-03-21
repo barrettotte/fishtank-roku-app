@@ -1,0 +1,39 @@
+' Main scene logic
+
+' Called when the scene is first created. Sets up initial state
+sub init()
+    m.top.backgroundColor = "0x000000FF"
+    m.top.backgroundURI = ""
+    m.top.setFocus(true)
+
+    m.currentScreen = invalid
+
+    print "[MainScene] App initialized"
+
+    ' Start by checking for a cached auth token.
+    showScreen("login")
+end sub
+
+' Switches the visible screen. Removes the old screen and creates the new one
+'   @param screenName - Which screen to show: "login", "grid", or "player"
+sub showScreen(screenName as string)
+    ' Remove current screen if one exists
+    if m.currentScreen <> invalid
+        m.top.removeChild(m.currentScreen)
+        m.currentScreen = invalid
+    end if
+
+    m.top.currentScreen = screenName
+    print "[MainScene] Navigating to: " + screenName
+
+    ' Screen creation will be added as each screen component is built. For now, just log the navigation
+end sub
+
+' Handles remote control key presses at the scene level
+function onKeyEvent(key as string, press as boolean) as boolean
+    if not press then return false
+
+    print "[MainScene] Key: " + key
+
+    return false
+end function

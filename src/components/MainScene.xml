@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Root scene component. Routes between login, grid, and player screens -->
+<component name="MainScene" extends="Scene">
+
+  <interface>
+      <field id="currentScreen" type="string" value="loading" />
+  </interface>
+
+  <script type="text/brightscript" uri="MainScene.bs" />
+
+  <children>
+    <!-- Background color for the whole app -->
+    <Rectangle id="background" width="1920" height="1080" color="0x000000FF" />
+
+    <!-- Temporary hello world label to verify the app runs -->
+    <Label id="helloLabel"
+      text="Hello world"
+      width="1920"
+      height="1080"
+      horizAlign="center"
+      vertAlign="center"
+      font="font:LargeBoldSystemFont"
+      color="0xFFFFFFFF" />
+  </children>
+
+</component>

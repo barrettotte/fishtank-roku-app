@@ -1,0 +1,25 @@
+{
+  "name": "fishtank-roku-app",
+  "version": "0.1.0",
+  "description": "Fishtank.live Roku app",
+  "private": true,
+  "author": "barrettotte",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/barrettotte/fishtank-roku-app"
+  },
+  "scripts": {
+    "build": "bsc",
+    "lint": "bsc --lintOnly",
+    "deploy": "npx roku-deploy",
+    "test": "bsc --stagingDir out/test && npx rooibos-cli run",
+    "clean": "rm -rf out/"
+  },
+  "devDependencies": {
+    "brighterscript": "^0.67.0",
+    "@rokucommunity/bslint": "^0.8.0",
+    "roku-deploy": "^3.12.0",
+    "rooibos-roku": "^5.0.0"
+  }
+}

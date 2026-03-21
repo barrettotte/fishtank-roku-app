@@ -1,0 +1,19 @@
+{
+  "rootDir": "src",
+  "stagingDir": "out/staging",
+  "sourceMap": true,
+  "retainStagingDir": true,
+  "files": [
+    "manifest",
+    "source/**/*",
+    "components/**/*",
+    "images/**/*"
+  ],
+  "plugins": [
+    "@rokucommunity/bslint"
+  ],
+  "diagnosticFilters": [
+    { "src": "node_modules/**/*" },
+    { "src": "**/main.bs" }
+  ]
+}

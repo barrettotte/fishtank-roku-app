@@ -1,0 +1,24 @@
+# Channel Details
+title=Fishtank_live
+major_version=0
+minor_version=1
+build_version=0
+
+# Channel Icons
+mm_icon_focus_fhd=pkg:/images/channel-poster_fhd.png
+mm_icon_focus_hd=pkg:/images/channel-poster_hd.png
+
+# Splash Screen
+splash_screen_fhd=pkg:/images/splash-screen_fhd.png
+splash_screen_hd=pkg:/images/splash-screen_hd.png
+splash_color=#000000
+splash_min_time=1500
+
+# Resolution
+ui_resolutions=fhd
+
+# Required Features
+requires_audiometadata=1
+bs_libs_required=roku_ads_lib
+supports_input_launch=1
+confirm_partner_button=1
