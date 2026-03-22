@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Background task for login and session validation API calls -->
+<component name="AuthTask" extends="Task">
+
+    <interface>
+      <!-- Input: "login" or "validate" -->
+      <field id="action" type="string" />
+
+      <!-- Input: email and password for login -->
+      <field id="email" type="string" />
+      <field id="password" type="string" />
+
+      <!-- Output: true if the request succeeded -->
+      <field id="success" type="boolean" value="false" />
+
+      <!-- Output: error message on failure -->
+      <field id="errorMessage" type="string" value="" />
+
+      <!-- Output: parsed session data (user info + tokens) -->
+      <field id="session" type="assocarray" />
+    </interface>
+
+    <script type="text/brightscript" uri="AuthTask.bs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+    <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+
+</component>

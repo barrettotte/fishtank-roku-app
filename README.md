@@ -1,6 +1,6 @@
 # fishtank-roku-app
 
-A basic 3rd party Roku app for watching Fishtank.live on Roku.
+A basic Roku app for watching Fishtank.live on Roku (unofficial).
 
 Shoutout to [agathanon](https://github.com/agathanon) for making the first Fishtank Roku repo, I'm glad I wasn't the only one with the idea.
 Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first because my repo/app was made for learning, fun, and primarily for myself.

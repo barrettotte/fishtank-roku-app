@@ -1,0 +1,42 @@
+' Token storage and retrieval using Roku registry
+
+' Saves the access token and live stream token to the registry
+sub saveTokens(accessToken as string, liveStreamToken as string)
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    sec.write(REGISTRY_ACCESS_TOKEN, accessToken)
+    sec.write(REGISTRY_LIVE_STREAM_TOKEN, liveStreamToken)
+    sec.flush()
+    print "[Auth] Tokens saved to registry"
+end sub
+
+' Reads the access token from the registry. Returns empty string if not found
+function getAccessToken() as string
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    if sec.exists(REGISTRY_ACCESS_TOKEN)
+        return sec.read(REGISTRY_ACCESS_TOKEN)
+    end if
+    return ""
+end function
+
+' Reads the live stream token from the registry. Returns empty string if not found
+function getLiveStreamToken() as string
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    if sec.exists(REGISTRY_LIVE_STREAM_TOKEN)
+        return sec.read(REGISTRY_LIVE_STREAM_TOKEN)
+    end if
+    return ""
+end function
+
+' Returns true if both tokens exist in the registry
+function hasTokens() as boolean
+    return getAccessToken() <> "" and getLiveStreamToken() <> ""
+end function
+
+' Deletes all stored tokens from the registry
+sub clearTokens()
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    sec.delete(REGISTRY_ACCESS_TOKEN)
+    sec.delete(REGISTRY_LIVE_STREAM_TOKEN)
+    sec.flush()
+    print "[Auth] Tokens cleared from registry"
+end sub

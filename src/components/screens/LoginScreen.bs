@@ -1,0 +1,153 @@
+' Login screen that collects email/password via keyboard dialogs
+
+sub init()
+    m.statusLabel = m.top.findNode("statusLabel")
+    m.top.findNode("versionLabel").text = "v" + APP_VERSION
+    m.email = ""
+    m.password = ""
+    m.dialogHandled = false
+
+    ' Check for dev credentials in manifest
+    appInfo = createObject("roAppInfo")
+    devEmail = appInfo.getValue("ft_email")
+    devPassword = appInfo.getValue("ft_password")
+    if devEmail <> "" and devPassword <> ""
+        print "[LoginScreen] Dev credentials found, auto-logging in"
+        m.email = devEmail
+        m.password = devPassword
+        doLogin()
+        return
+    end if
+
+    print "[LoginScreen] Ready"
+end sub
+
+' Handles remote key presses. OK starts the login flow
+function onKeyEvent(key as string, press as boolean) as boolean
+    if not press
+        return false
+    end if
+
+    print "[LoginScreen] Key: " + key
+
+    if key = "OK"
+        showEmailKeyboard()
+        return true
+    end if
+
+    return false
+end function
+
+' Opens a keyboard dialog for entering the email address
+sub showEmailKeyboard()
+    m.dialogHandled = false
+    dialog = createObject("roSGNode", "StandardKeyboardDialog")
+    dialog.title = "Enter Email"
+    dialog.buttons = ["OK"]
+    dialog.observeField("buttonSelected", "onEmailEntered")
+    dialog.observeField("wasClosed", "onEmailClosed")
+    m.top.getScene().dialog = dialog
+end sub
+
+' Called when the user presses OK on the email dialog
+sub onEmailEntered()
+    m.dialogHandled = true
+    dialog = m.top.getScene().dialog
+    m.email = dialog.text
+    dialog.close = true
+
+    if m.email = ""
+        setStatus("Email cannot be empty", COLOR_DANGER)
+        return
+    end if
+
+    print "[LoginScreen] Email entered: " + m.email
+    showPasswordKeyboard()
+end sub
+
+' Called when the email dialog closes. Only acts if OK was not pressed
+sub onEmailClosed()
+    if m.dialogHandled
+        return
+    end if
+
+    print "[LoginScreen] Email dialog cancelled"
+    m.top.getScene().dialog = invalid
+    m.top.setFocus(true)
+end sub
+
+' Opens a keyboard dialog for entering the password (masked input)
+sub showPasswordKeyboard()
+    dialog = createObject("roSGNode", "StandardKeyboardDialog")
+    dialog.title = "Enter Password"
+    dialog.buttons = ["OK"]
+    dialog.textEditBox.secureMode = true
+    dialog.observeField("buttonSelected", "onPasswordEntered")
+    dialog.observeField("wasClosed", "onPasswordClosed")
+    m.top.getScene().dialog = dialog
+    m.dialogHandled = false
+end sub
+
+' Called when the user presses OK on the password dialog
+sub onPasswordEntered()
+    m.dialogHandled = true
+    dialog = m.top.getScene().dialog
+    m.password = dialog.text
+    dialog.close = true
+
+    if m.password = ""
+        setStatus("Password cannot be empty", COLOR_DANGER)
+        return
+    end if
+
+    print "[LoginScreen] Password entered"
+    doLogin()
+end sub
+
+' Called when the password dialog closes. Only acts if OK was not pressed
+sub onPasswordClosed()
+    if m.dialogHandled
+        return
+    end if
+
+    print "[LoginScreen] Password dialog cancelled"
+    m.top.getScene().dialog = invalid
+    m.top.setFocus(true)
+end sub
+
+' Starts the AuthTask to log in with collected credentials
+sub doLogin()
+    setStatus("Logging in...", COLOR_ACCENT)
+
+    m.authTask = createObject("roSGNode", "AuthTask")
+    m.authTask.action = "login"
+    m.authTask.email = m.email
+    m.authTask.password = m.password
+    m.authTask.observeField("success", "onLoginSuccess")
+    m.authTask.observeField("errorMessage", "onLoginError")
+    m.authTask.control = "run"
+end sub
+
+' Called when login succeeds
+sub onLoginSuccess()
+    if m.authTask.success
+        setStatus("Login successful!", COLOR_ACCENT)
+        m.top.loginSuccess = m.authTask.session
+    end if
+    m.password = ""
+end sub
+
+' Called when login fails
+sub onLoginError()
+    setStatus(m.authTask.errorMessage, COLOR_DANGER)
+    m.top.loginError = m.authTask.errorMessage
+    m.top.setFocus(true)
+    m.password = ""
+end sub
+
+' Updates the status label text and color
+sub setStatus(text as string, color = COLOR_ACCENT as string)
+    m.statusLabel.text = text
+    m.statusLabel.color = color
+    print "[LoginScreen] " + text
+end sub

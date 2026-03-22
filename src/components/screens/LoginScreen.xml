@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Login screen with email/password input using keyboard dialogs -->
+<component name="LoginScreen" extends="Group">
+
+  <interface>
+    <!-- Fires when login succeeds. Value is the session assocarray -->
+    <field id="loginSuccess" type="assocarray" alwaysNotify="true" />
+    <!-- Fires with error message string on login failure -->
+    <field id="loginError" type="string" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="LoginScreen.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+
+  <children>
+    <!-- Cream/tan background matching the web login -->
+    <Rectangle id="background" width="1920" height="1080" color="0xDDDEC4FF" />
+
+    <!-- Centered card panel -->
+    <Rectangle id="cardBg"
+      width="700"
+      height="700"
+      translation="[610, 140]"
+      color="0xD0D1B8FF" />
+
+    <!-- Logo dark bar with image and season tag -->
+    <Rectangle width="700" height="160" translation="[610, 140]" color="0x191C20FF" />
+    <Poster id="logoImage"
+      uri="pkg:/images/logo-stripe.png"
+      width="400"
+      height="80"
+      translation="[760, 160]"
+      loadDisplayMode="scaleToFit" />
+    <Label id="seasonLabel"
+      text="Season 5"
+      width="700"
+      translation="[610, 250]"
+      horizAlign="center"
+      font="font:SmallSystemFont"
+      color="0x999999FF" />
+
+    <!-- Divider line -->
+    <Rectangle width="580" height="2" translation="[670, 330]" color="0xB0B19AFF" />
+
+    <!-- Prompt text -->
+    <Label id="promptLabel"
+      text="Press OK to log in"
+      width="700"
+      translation="[610, 380]"
+      horizAlign="center"
+      font="font:MediumSystemFont"
+      color="0x191C20FF" />
+
+    <!-- Status text for errors/loading -->
+    <Label id="statusLabel"
+      text=""
+      width="700"
+      translation="[610, 450]"
+      horizAlign="center"
+      font="font:SmallSystemFont"
+      color="0xEFC820FF" />
+
+    <!-- "Log In" button -->
+    <Rectangle id="loginButtonBg"
+      width="580"
+      height="60"
+      translation="[670, 540]"
+      color="0x26B64BFF" />
+    <Label id="loginButtonLabel"
+      text="Log In"
+      width="580"
+      height="60"
+      translation="[670, 540]"
+      horizAlign="center"
+      vertAlign="center"
+      font="font:MediumBoldSystemFont"
+      color="0xFFFFFFFF" />
+
+    <!-- Divider above credits -->
+    <Rectangle width="580" height="2" translation="[670, 660]" color="0xB0B19AFF" />
+
+    <!-- Credits inside card -->
+    <Label id="creditLabel"
+      text="Unofficial Roku App"
+      width="700"
+      translation="[610, 680]"
+      horizAlign="center"
+      font="font:SmallestSystemFont"
+      color="0x8A8A72FF" />
+    <Label id="versionLabel"
+      text="v0.1.0"
+      width="700"
+      translation="[610, 710]"
+      horizAlign="center"
+      font="font:SmallestSystemFont"
+      color="0x8A8A72FF" />
+    <Label id="repoLabel"
+      text="github.com/barrettotte/fishtank-roku-app"
+      width="700"
+      translation="[610, 740]"
+      horizAlign="center"
+      font="font:SmallestSystemFont"
+      color="0x8A8A72FF" />
+
+  </children>
+
+</component>

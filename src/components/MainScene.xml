@@ -7,20 +7,11 @@
   </interface>
 
   <script type="text/brightscript" uri="MainScene.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
 
   <children>
-    <!-- Background color for the whole app -->
-    <Rectangle id="background" width="1920" height="1080" color="0x000000FF" />
-
-    <!-- Temporary hello world label to verify the app runs -->
-    <Label id="helloLabel"
-      text="Hello world"
-      width="1920"
-      height="1080"
-      horizAlign="center"
-      vertAlign="center"
-      font="font:LargeBoldSystemFont"
-      color="0xFFFFFFFF" />
+    <Rectangle id="background" width="1920" height="1080" color="0x191C20FF" />
   </children>
 
 </component>

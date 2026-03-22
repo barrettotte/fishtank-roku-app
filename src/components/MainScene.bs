@@ -2,20 +2,50 @@
 
 ' Called when the scene is first created. Sets up initial state
 sub init()
-    m.top.backgroundColor = "0x000000FF"
+    m.top.backgroundColor = COLOR_DARK
     m.top.backgroundURI = ""
-    m.top.setFocus(true)
 
     m.currentScreen = invalid
 
     print "[MainScene] App initialized"
 
-    ' Start by checking for a cached auth token.
+    ' Check for a cached auth token before showing login
+    print "[MainScene] hasTokens=" + hasTokens().toStr()
+
+    if hasTokens()
+        print "[MainScene] Found cached tokens, validating..."
+        validateToken()
+    else
+        print "[MainScene] No cached tokens, showing login"
+        showScreen("login")
+    end if
+end sub
+
+' Validates the cached token using AuthTask
+sub validateToken()
+    m.authTask = createObject("roSGNode", "AuthTask")
+    m.authTask.action = "validate"
+    m.authTask.observeField("success", "onValidateResult")
+    m.authTask.observeField("errorMessage", "onValidateError")
+    m.authTask.control = "run"
+end sub
+
+' Called when token validation succeeds
+sub onValidateResult()
+    if m.authTask.success
+        print "[MainScene] Cached token is valid, going to grid"
+        showScreen("grid")
+    end if
+end sub
+
+' Called when token validation fails
+sub onValidateError()
+    print "[MainScene] Cached token is invalid, showing login"
+    clearTokens()
     showScreen("login")
 end sub
 
 ' Switches the visible screen. Removes the old screen and creates the new one
-'   @param screenName - Which screen to show: "login", "grid", or "player"
 sub showScreen(screenName as string)
     ' Remove current screen if one exists
     if m.currentScreen <> invalid
@@ -26,12 +56,27 @@ sub showScreen(screenName as string)
     m.top.currentScreen = screenName
     print "[MainScene] Navigating to: " + screenName
 
-    ' Screen creation will be added as each screen component is built. For now, just log the navigation
+    if screenName = "login"
+        m.currentScreen = createObject("roSGNode", "LoginScreen")
+        m.currentScreen.observeField("loginSuccess", "onLoginSuccess")
+        m.top.appendChild(m.currentScreen)
+        m.currentScreen.setFocus(true)
+    else if screenName = "grid"
+        print "[MainScene] GridScreen not yet implemented"
+    end if
+end sub
+
+' Called when LoginScreen fires a successful login
+sub onLoginSuccess()
+    print "[MainScene] Login successful, navigating to grid"
+    showScreen("grid")
 end sub
 
 ' Handles remote control key presses at the scene level
 function onKeyEvent(key as string, press as boolean) as boolean
-    if not press then return false
+    if not press
+        return false
+    end if
 
     print "[MainScene] Key: " + key
 

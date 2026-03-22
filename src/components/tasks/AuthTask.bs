@@ -1,0 +1,171 @@
+' Background task for auth API calls (login and session validation)
+
+' Task entry point. Runs the action specified by the "action" field
+sub init()
+    m.top.functionName = "execute"
+end sub
+
+' Dispatches to the correct action handler
+sub execute()
+    action = m.top.action
+
+    if action = "login"
+        doLogin()
+    else if action = "validate"
+        doValidate()
+    else
+        print "[AuthTask] Unknown action: " + action
+    end if
+end sub
+
+' Posts email/password to /auth/log-in and parses the session response
+sub doLogin()
+    print "[AuthTask] Logging in..."
+
+    url = API_BASE_URL + "/auth/log-in"
+    body = formatJson({ email: m.top.email, password: m.top.password })
+
+    response = httpPost(url, body)
+    handleAuthResponse(response)
+end sub
+
+' Validates an existing access token via GET /auth
+sub doValidate()
+    print "[AuthTask] Validating cached token..."
+
+    accessToken = getAccessToken()
+    if accessToken = ""
+        m.top.success = false
+        m.top.errorMessage = "No cached token"
+        return
+    end if
+
+    url = API_BASE_URL + "/auth"
+    response = httpGet(url, accessToken)
+    handleAuthResponse(response)
+end sub
+
+' Parses the auth response and sets output fields
+sub handleAuthResponse(response as object)
+    if response = invalid
+        m.top.success = false
+        m.top.errorMessage = "Network error"
+        print "[AuthTask] Network error"
+        return
+    end if
+
+    ' Handle non-200 responses
+    if response.code <> 200
+        errorMsg = "Server error (HTTP " + response.code.toStr() + ")"
+        ' Try to parse error message from body if present
+        if response.body <> invalid and response.body <> ""
+            errorJson = parseJson(response.body)
+            if errorJson <> invalid
+                if errorJson.error <> invalid and errorJson.error.message <> invalid
+                    errorMsg = errorJson.error.message
+                else if errorJson.message <> invalid
+                    errorMsg = errorJson.message
+                end if
+            end if
+        end if
+
+        m.top.success = false
+        m.top.errorMessage = errorMsg
+        print "[AuthTask] " + errorMsg
+        return
+    end if
+
+    json = parseJson(response.body)
+    if json = invalid
+        m.top.success = false
+        m.top.errorMessage = "Invalid response"
+        print "[AuthTask] Failed to parse response"
+        return
+    end if
+
+    print "[AuthTask] Response keys: " + formatJson(json.keys())
+    if json.data <> invalid
+        print "[AuthTask] data keys: " + formatJson(json.data.keys())
+        if json.data.session <> invalid
+            print "[AuthTask] session keys: " + formatJson(json.data.session.keys())
+        else
+            print "[AuthTask] data.session is invalid"
+        end if
+    else
+        print "[AuthTask] data is invalid"
+    end if
+
+    session = invalid
+    if json.data <> invalid and json.data.session <> invalid
+        session = json.data.session
+    else if json.session <> invalid
+        session = json.session
+    end if
+
+    if session = invalid or session.access_token = invalid
+        ' Check for error message from API
+        errorMsg = "Login failed"
+        if json.error <> invalid and json.error.message <> invalid
+            errorMsg = json.error.message
+        else if json.message <> invalid
+            errorMsg = json.message
+        end if
+
+        m.top.success = false
+        m.top.errorMessage = errorMsg
+        print "[AuthTask] " + errorMsg
+        return
+    end if
+
+    ' Save tokens to registry
+    liveStreamToken = ""
+    if session.live_stream_token <> invalid
+        liveStreamToken = session.live_stream_token
+    end if
+
+    saveTokens(session.access_token, liveStreamToken)
+
+    m.top.session = session
+    m.top.success = true
+    print "[AuthTask] Auth successful"
+end sub
+
+' Makes an HTTP POST request with JSON body. Returns {code, body} or invalid on timeout
+function httpPost(url as string, body as string) as dynamic
+    request = createObject("roUrlTransfer")
+    request.setUrl(url)
+    request.setCertificatesFile("common:/certs/ca-bundle.crt")
+    request.initClientCertificates()
+    request.addHeader("Content-Type", "application/json")
+    request.setMessagePort(createObject("roMessagePort"))
+    request.asyncPostFromString(body)
+
+    msg = wait(10000, request.getMessagePort())
+    if type(msg) = "roUrlEvent"
+        print "[AuthTask] HTTP " + msg.getResponseCode().toStr()
+        return { code: msg.getResponseCode(), body: msg.getString() }
+    end if
+
+    print "[AuthTask] Request timed out"
+    return invalid
+end function
+
+' Makes an HTTP GET request with Bearer auth. Returns {code, body} or invalid on timeout
+function httpGet(url as string, token as string) as dynamic
+    request = createObject("roUrlTransfer")
+    request.setUrl(url)
+    request.setCertificatesFile("common:/certs/ca-bundle.crt")
+    request.initClientCertificates()
+    request.addHeader("Authorization", "Bearer " + token)
+    request.setMessagePort(createObject("roMessagePort"))
+    request.asyncGetToString()
+
+    msg = wait(10000, request.getMessagePort())
+    if type(msg) = "roUrlEvent"
+        print "[AuthTask] HTTP " + msg.getResponseCode().toStr()
+        return { code: msg.getResponseCode(), body: msg.getString() }
+    end if
+
+    print "[AuthTask] Request timed out"
+    return invalid
+end function
