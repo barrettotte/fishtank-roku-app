@@ -1,42 +1,179 @@
-' Dialog for selecting stream quality (low/medium/high)
+' Settings dialog for stream quality and server selection
+
+' Layout constants
+const DIALOG_WIDTH = 340
+const OPTION_HEIGHT = 36
+const OPTION_GAP = 4
+const SECTION_GAP = 16
+const PANEL_PADDING = 18
+const OPTION_INNER_WIDTH = 304
 
 sub init()
-    m.options = [
+    m.container = m.top.findNode("optionsContainer")
+    m.panelBorder = m.top.findNode("panelBorder")
+    m.panelBg = m.top.findNode("panelBg")
+    m.titleLabel = m.top.findNode("titleLabel")
+
+    ' Quality options
+    m.qualityOptions = [
         { label: "High", value: QUALITY_HIGH },
         { label: "Medium", value: QUALITY_MEDIUM },
         { label: "Low", value: QUALITY_LOW }
     ]
 
-    m.optionBgs = [
-        m.top.findNode("optionBg0"),
-        m.top.findNode("optionBg1"),
-        m.top.findNode("optionBg2")
+    ' Server options
+    m.serverOptions = [
+        { label: "Auto", value: "auto" },
+        { label: "US-East (b)", value: "streams-b.fishtank.live" },
+        { label: "US-West (c)", value: "streams-c.fishtank.live" },
+        { label: "US-West (e)", value: "streams-e.fishtank.live" },
+        { label: "US-West (f)", value: "streams-f.fishtank.live" },
+        { label: "US-West (g)", value: "streams-g.fishtank.live" },
+        { label: "US-West (h)", value: "streams-h.fishtank.live" },
+        { label: "US-West (i)", value: "streams-i.fishtank.live" },
+        { label: "US-West (j)", value: "streams-j.fishtank.live" },
+        { label: "US-West (k)", value: "streams-k.fishtank.live" }
     ]
 
-    m.selectedIndex = 0
-    updateHighlight()
+    m.allOptions = []
+    m.allOptionBgs = []
+    m.focusIndex = 0
+    m.selectedQualityIndex = 0
+    m.selectedServerIndex = 0
 
+    buildLayout()
     print "[QualityDialog] Ready"
 end sub
 
-' Sets the initial selection to match the current quality
-sub setCurrentQuality(quality as string)
-    for i = 0 to m.options.count() - 1
-        if m.options[i].value = quality
-            m.selectedIndex = i
-            updateHighlight()
-            return
-        end if
+' Builds the dialog layout dynamically
+sub buildLayout()
+    panelX = (1920 - DIALOG_WIDTH) / 2
+    y = 0
+
+    ' Title
+    m.titleLabel.width = DIALOG_WIDTH
+    m.titleLabel.height = 40
+    y = y + 40
+
+    ' Quality section
+    y = y + 8
+    addSectionHeader("Quality", y)
+    y = y + 28
+
+    for i = 0 to m.qualityOptions.count() - 1
+        addOption(m.qualityOptions[i].label, "quality", i, y)
+        y = y + OPTION_HEIGHT + OPTION_GAP
     end for
+
+    ' Server section
+    y = y + SECTION_GAP
+    addSectionHeader("Server", y)
+    y = y + 28
+
+    for i = 0 to m.serverOptions.count() - 1
+        addOption(m.serverOptions[i].label, "server", i, y)
+        y = y + OPTION_HEIGHT + OPTION_GAP
+    end for
+
+    ' Size and position the panel
+    panelHeight = y + PANEL_PADDING * 2
+    panelY = (1080 - panelHeight) / 2
+
+    m.panelBorder.width = DIALOG_WIDTH
+    m.panelBorder.height = panelHeight
+    m.panelBorder.translation = [panelX, panelY]
+
+    m.panelBg.width = DIALOG_WIDTH - 4
+    m.panelBg.height = panelHeight - 4
+    m.panelBg.translation = [panelX + 2, panelY + 2]
+
+    m.titleLabel.translation = [0, 0]
+    m.container.translation = [panelX + PANEL_PADDING, panelY + PANEL_PADDING]
+    m.titleLabel.translation = [0, 0]
+    m.container.insertChild(m.titleLabel, 0)
+
+    updateHighlight()
 end sub
 
-' Updates the highlight to show which option is selected
+' Adds a section header label and divider at the given Y position
+sub addSectionHeader(text as string, y as integer)
+    header = createObject("roSGNode", "Label")
+    header.text = text
+    header.width = OPTION_INNER_WIDTH
+    header.height = 20
+    header.font = "font:SmallestBoldSystemFont"
+    header.color = COLOR_GRAY
+    header.translation = [0, y]
+    m.container.appendChild(header)
+
+    divider = createObject("roSGNode", "Rectangle")
+    divider.width = OPTION_INNER_WIDTH
+    divider.height = 1
+    divider.color = COLOR_PANEL_BORDER
+    divider.translation = [0, y + 22]
+    m.container.appendChild(divider)
+end sub
+
+' Adds an option row (background + label) at the given Y position
+sub addOption(text as string, optionType as string, index as integer, y as integer)
+    bg = createObject("roSGNode", "Rectangle")
+    bg.width = OPTION_INNER_WIDTH
+    bg.height = OPTION_HEIGHT
+    bg.color = COLOR_PANEL_BORDER
+    bg.translation = [0, y]
+    m.container.appendChild(bg)
+
+    label = createObject("roSGNode", "Label")
+    label.text = text
+    label.width = OPTION_INNER_WIDTH
+    label.height = OPTION_HEIGHT
+    label.horizAlign = "center"
+    label.vertAlign = "center"
+    label.font = "font:SmallSystemFont"
+    label.color = COLOR_WHITE
+    label.translation = [0, y]
+    m.container.appendChild(label)
+
+    m.allOptions.push({ type: optionType, index: index })
+    m.allOptionBgs.push(bg)
+end sub
+
+' Sets the initial selection to match current quality and server
+sub setCurrentSettings(quality as string, server as string)
+    for i = 0 to m.qualityOptions.count() - 1
+        if m.qualityOptions[i].value = quality
+            m.selectedQualityIndex = i
+            m.focusIndex = i
+        end if
+    end for
+
+    for i = 0 to m.serverOptions.count() - 1
+        if m.serverOptions[i].value = server
+            m.selectedServerIndex = i
+        end if
+    end for
+
+    updateHighlight()
+end sub
+
+' Updates the highlight to show focus and selected state
 sub updateHighlight()
-    for i = 0 to m.optionBgs.count() - 1
-        if i = m.selectedIndex
-            m.optionBgs[i].color = COLOR_SECONDARY
+    for i = 0 to m.allOptionBgs.count() - 1
+        option = m.allOptions[i]
+        isSelected = false
+
+        if option.type = "quality" and option.index = m.selectedQualityIndex
+            isSelected = true
+        else if option.type = "server" and option.index = m.selectedServerIndex
+            isSelected = true
+        end if
+
+        if i = m.focusIndex
+            m.allOptionBgs[i].color = COLOR_PRIMARY
+        else if isSelected
+            m.allOptionBgs[i].color = COLOR_SECONDARY
         else
-            m.optionBgs[i].color = "0x2A2D32FF"
+            m.allOptionBgs[i].color = COLOR_PANEL_BORDER
         end if
     end for
 end sub
@@ -49,29 +186,39 @@ function onKeyEvent(key as string, press as boolean) as boolean
     print "[QualityDialog] Key: " + key
 
     if key = "up"
-        if m.selectedIndex > 0
-            m.selectedIndex = m.selectedIndex - 1
+        if m.focusIndex > 0
+            m.focusIndex = m.focusIndex - 1
             updateHighlight()
         end if
         return true
     end if
 
     if key = "down"
-        if m.selectedIndex < m.options.count() - 1
-            m.selectedIndex = m.selectedIndex + 1
+        if m.focusIndex < m.allOptions.count() - 1
+            m.focusIndex = m.focusIndex + 1
             updateHighlight()
         end if
         return true
     end if
 
     if key = "OK"
-        selected = m.options[m.selectedIndex]
-        print "[QualityDialog] Selected: " + selected.label + " (" + selected.value + ")"
-        m.top.selectedQuality = selected.value
+        option = m.allOptions[m.focusIndex]
+        if option.type = "quality"
+            m.selectedQualityIndex = option.index
+            selected = m.qualityOptions[option.index]
+            print "[QualityDialog] Quality: " + selected.label
+            m.top.selectedQuality = selected.value
+        else if option.type = "server"
+            m.selectedServerIndex = option.index
+            selected = m.serverOptions[option.index]
+            print "[QualityDialog] Server: " + selected.label
+            m.top.selectedServer = selected.value
+        end if
+        updateHighlight()
         return true
     end if
 
-    if key = "back" or key = "options"
+    if key = "back"
         m.top.close = true
         return true
     end if

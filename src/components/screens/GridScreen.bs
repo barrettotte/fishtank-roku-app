@@ -152,10 +152,19 @@ end sub
 
 ' Called when StreamsTask fails
 sub onStreamsError()
-    m.messageLabel.text = m.streamsTask.errorMessage
+    errorMsg = m.streamsTask.errorMessage
+    print "[GridScreen] Error: " + errorMsg
+
+    ' Expired token → log out and return to login
+    if errorMsg = "Session expired"
+        clearTokens()
+        m.top.logout = true
+        return
+    end if
+
+    m.messageLabel.text = errorMsg
     m.messageLabel.color = COLOR_DANGER
     m.headerStatus.text = "Error"
-    print "[GridScreen] Error: " + m.streamsTask.errorMessage
 end sub
 
 ' Builds the grid content from the stream list
@@ -243,8 +252,65 @@ sub onCameraSelected()
         return
     end if
 
+    ' Warn if the stream is offline
+    status = selectedItem.getField("status")
+    if status <> "online"
+        print "[GridScreen] Selected offline stream: " + selectedItem.title
+        dialog = createObject("roSGNode", "StandardMessageDialog")
+        dialog.title = "Stream Offline"
+        dialog.message = [selectedItem.title + " is currently offline."]
+        dialog.buttons = ["OK"]
+        dialog.observeField("buttonSelected", "onOfflineDialogDismissed")
+        m.top.getScene().dialog = dialog
+        return
+    end if
+
     print "[GridScreen] Selected: " + selectedItem.title
     m.top.streamSelected = selectedItem
+end sub
+
+' Dismisses the offline stream dialog
+sub onOfflineDialogDismissed()
+    m.top.getScene().dialog.close = true
+    m.top.getScene().dialog = invalid
+    m.cameraGrid.setFocus(true)
+end sub
+
+' Shows a confirmation dialog for logging out
+sub showLogoutDialog()
+    dialog = createObject("roSGNode", "StandardMessageDialog")
+    dialog.title = "Log Out"
+    dialog.message = ["Are you sure you want to log out?"]
+    dialog.buttons = ["Log Out", "Cancel"]
+    dialog.observeField("buttonSelected", "onLogoutDialogButton")
+    dialog.observeField("wasClosed", "onLogoutDialogClosed")
+
+    m.top.getScene().dialog = dialog
+    print "[GridScreen] Showing logout dialog"
+end sub
+
+' Called when a button is pressed on the logout dialog
+sub onLogoutDialogButton()
+    dialog = m.top.getScene().dialog
+    buttonIndex = dialog.buttonSelected
+
+    dialog.close = true
+    m.top.getScene().dialog = invalid
+
+    if buttonIndex = 0
+        print "[GridScreen] Logging out"
+        clearTokens()
+        m.top.logout = true
+    else
+        print "[GridScreen] Logout cancelled"
+        m.cameraGrid.setFocus(true)
+    end if
+end sub
+
+' Called when the logout dialog is closed without a button press
+sub onLogoutDialogClosed()
+    m.top.getScene().dialog = invalid
+    m.cameraGrid.setFocus(true)
 end sub
 
 ' Handles remote key presses
@@ -254,6 +320,11 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
 
     print "[GridScreen] Key: " + key
+
+    if key = "options"
+        showLogoutDialog()
+        return true
+    end if
 
     return false
 end function

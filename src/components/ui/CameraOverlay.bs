@@ -21,14 +21,16 @@ sub populateGrid()
         source = cameraList.getChild(i)
         item = content.createChild("ContentNode")
         item.title = source.title
+
+        ' Mark the currently playing camera
+        isCurrent = source.getField("streamId") = m.top.currentStreamId
+        item.addFields({ isCurrent: isCurrent })
+        if isCurrent
+            currentIndex = i
+        end if
         item.addFields({ streamId: source.getField("streamId") })
         item.addFields({ server: source.getField("server") })
         item.addFields({ status: source.getField("status") })
-
-        ' Track which camera is currently playing
-        if source.getField("streamId") = m.top.currentStreamId
-            currentIndex = i
-        end if
     end for
 
     m.cameraListNode.content = content
@@ -44,6 +46,13 @@ sub onItemSelected()
     selectedItem = m.cameraListNode.content.getChild(selectedIndex)
 
     if selectedItem = invalid
+        return
+    end if
+
+    ' Don't allow selecting offline streams
+    status = selectedItem.getField("status")
+    if status <> "online"
+        print "[CameraOverlay] Stream offline: " + selectedItem.title
         return
     end if
 

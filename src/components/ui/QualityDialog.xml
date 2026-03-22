@@ -1,14 +1,16 @@
 <?xml version="1.0" encoding="utf-8" ?>
-<!-- Dialog for selecting stream quality (low/medium/high) -->
+<!-- Settings dialog for stream quality and server selection -->
 <component name="QualityDialog" extends="Group">
 
   <interface>
-    <!-- Output: fires with the selected quality value (minbps/2mbps/maxbps) -->
+    <!-- Output: fires with the selected quality value -->
     <field id="selectedQuality" type="string" alwaysNotify="true" />
+    <!-- Output: fires with the selected server hostname -->
+    <field id="selectedServer" type="string" alwaysNotify="true" />
     <!-- Output: fires when the dialog is dismissed -->
     <field id="close" type="boolean" alwaysNotify="true" />
-    <!-- Function: sets the initial highlight to match current quality -->
-    <function name="setCurrentQuality" />
+    <!-- Function: sets the initial state -->
+    <function name="setCurrentSettings" />
   </interface>
 
   <script type="text/brightscript" uri="QualityDialog.bs" />
@@ -18,84 +20,19 @@
     <!-- Semi-transparent backdrop -->
     <Rectangle id="backdrop" width="1920" height="1080" color="0x00000088" />
 
-    <!-- Dialog panel with border -->
-    <Rectangle id="panelBorder"
-      width="320"
-      height="260"
-      translation="[800, 410]"
-      color="0x2A2D32FF" />
-    <Rectangle id="panelBg"
-      width="316"
-      height="256"
-      translation="[802, 412]"
-      color="0x191C20FF" />
+    <!-- Dialog panel (sized dynamically in init) -->
+    <Rectangle id="panelBorder" color="0x2A2D32FF" />
+    <Rectangle id="panelBg" color="0x191C20FF" />
 
     <!-- Title -->
     <Label id="titleLabel"
-      text="Quality"
-      width="316"
-      translation="[802, 422]"
+      text="Stream Settings"
       horizAlign="center"
-      font="font:SmallBoldSystemFont"
-      color="0xDDDEC4FF" />
-
-    <!-- Divider -->
-    <Rectangle width="280" height="1" translation="[820, 458]" color="0x2A2D32FF" />
-
-    <!-- Quality options -->
-    <Rectangle id="optionBg0"
-      width="280"
-      height="44"
-      translation="[820, 472]"
-      color="0x26B64BFF" />
-    <Label id="optionLabel0"
-      text="High"
-      width="280"
-      height="44"
-      translation="[820, 472]"
-      horizAlign="center"
-      vertAlign="center"
       font="font:SmallBoldSystemFont"
       color="0xFFFFFFFF" />
 
-    <Rectangle id="optionBg1"
-      width="280"
-      height="44"
-      translation="[820, 524]"
-      color="0x2A2D32FF" />
-    <Label id="optionLabel1"
-      text="Medium"
-      width="280"
-      height="44"
-      translation="[820, 524]"
-      horizAlign="center"
-      vertAlign="center"
-      font="font:SmallBoldSystemFont"
-      color="0xFFFFFFFF" />
-
-    <Rectangle id="optionBg2"
-      width="280"
-      height="44"
-      translation="[820, 576]"
-      color="0x2A2D32FF" />
-    <Label id="optionLabel2"
-      text="Low"
-      width="280"
-      height="44"
-      translation="[820, 576]"
-      horizAlign="center"
-      vertAlign="center"
-      font="font:SmallBoldSystemFont"
-      color="0xFFFFFFFF" />
-
-    <!-- Hint text -->
-    <Label id="hintLabel"
-      text="Press Back to cancel"
-      width="316"
-      translation="[802, 632]"
-      horizAlign="center"
-      font="font:SmallestSystemFont"
-      color="0x999999FF" />
+    <!-- Container for dynamically created options -->
+    <Group id="optionsContainer" />
   </children>
 
 </component>

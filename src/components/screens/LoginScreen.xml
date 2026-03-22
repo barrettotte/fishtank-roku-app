@@ -15,7 +15,7 @@
 
   <children>
     <!-- Cream/tan background matching the web login -->
-    <Rectangle id="background" width="1920" height="1080" color="0xDDDEC4FF" />
+    <Rectangle id="background" width="1920" height="1080" color="0xFFFFFFFF" />
 
     <!-- Centered card panel -->
     <Rectangle id="cardBg"

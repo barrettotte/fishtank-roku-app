@@ -2,8 +2,43 @@
 
 A basic Roku app for watching Fishtank.live on Roku (unofficial).
 
-Shoutout to [agathanon](https://github.com/agathanon) for making the first Fishtank Roku repo, I'm glad I wasn't the only one with the idea.
+Shoutout to [agathanon](https://github.com/agathanon) for making the first Fishtank Roku app repo (I think), I'm glad I wasn't the only one with the idea.
 Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first because my repo/app was made for learning, fun, and primarily for myself.
+
+## Features
+
+- Login with Fishtank.live email/password
+- Auto-login with cached tokens on subsequent launches
+- Camera grid with live thumbnails and online/offline indicators
+- Full-screen HLS video playback
+- Switch cameras without leaving the player (press Up)
+- Stream quality selection: High / Medium / Low (press Down)
+- Edge server override for outages (press Down)
+- Quality and server preferences persist across sessions
+
+## Controls
+
+### Camera Grid
+| Button | Action |
+|--------|--------|
+| Arrow keys | Navigate cameras |
+| OK | Open selected camera stream |
+| * (Options) | Log out |
+
+### Video Player
+| Button | Action |
+|--------|--------|
+| OK | Show camera name, quality, and server info |
+| Up | Open camera switcher |
+| Down | Open stream settings (quality and server) |
+| Back | Return to camera grid |
+
+### Camera Switcher (in player)
+| Button | Action |
+|--------|--------|
+| Up / Down | Navigate camera list |
+| OK | Switch to selected camera |
+| Back | Close switcher |
 
 ## Setup
 

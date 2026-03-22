@@ -44,6 +44,38 @@ function getLiveStreamToken() as string
     return ""
 end function
 
+' Saves the preferred quality to the registry
+sub saveQuality(quality as string)
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    sec.write(REGISTRY_QUALITY, quality)
+    sec.flush()
+end sub
+
+' Reads the preferred quality from the registry
+function getQuality() as string
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    if sec.exists(REGISTRY_QUALITY)
+        return sec.read(REGISTRY_QUALITY)
+    end if
+    return QUALITY_DEFAULT
+end function
+
+' Saves the preferred server to the registry
+sub saveServer(server as string)
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    sec.write(REGISTRY_SERVER, server)
+    sec.flush()
+end sub
+
+' Reads the preferred server from the registry
+function getServer() as string
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    if sec.exists(REGISTRY_SERVER)
+        return sec.read(REGISTRY_SERVER)
+    end if
+    return "auto"
+end function
+
 ' Returns true if both tokens exist in the registry
 function hasTokens() as boolean
     return getAccessToken() <> "" and getLiveStreamToken() <> ""

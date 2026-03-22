@@ -64,6 +64,7 @@ sub showScreen(screenName as string)
     else if screenName = "grid"
         m.currentScreen = createObject("roSGNode", "GridScreen")
         m.currentScreen.observeField("streamSelected", "onStreamSelected")
+        m.currentScreen.observeField("logout", "onLogout")
         m.top.appendChild(m.currentScreen)
         m.currentScreen.setFocus(true)
     else if screenName = "player"
@@ -98,6 +99,12 @@ end sub
 sub onPlayerClose()
     print "[MainScene] Player closed, returning to grid"
     showScreen("grid")
+end sub
+
+' Called when user logs out from the grid screen
+sub onLogout()
+    print "[MainScene] Logged out, returning to login"
+    showScreen("login")
 end sub
 
 ' Handles remote control key presses at the scene level

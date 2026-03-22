@@ -31,6 +31,8 @@ const REGISTRY_SECTION = "FishtankAuth"
 const REGISTRY_ACCESS_TOKEN = "access_token"
 const REGISTRY_LIVE_STREAM_TOKEN = "live_stream_token"
 const REGISTRY_DISPLAY_NAME = "display_name"
+const REGISTRY_QUALITY = "quality"
+const REGISTRY_SERVER = "server"
 
 ' HTTP request timeout in milliseconds
 const HTTP_TIMEOUT = 10000
@@ -43,7 +45,7 @@ const CURRENT_SEASON = 5
 
 ' Theme colors
 const COLOR_DARK = "0x191C20FF"
-const COLOR_LIGHT = "0xDDDEC4FF"
+const COLOR_LIGHT = "0xFFFFFFFF"
 const COLOR_PRIMARY = "0xDF4E1EFF"
 const COLOR_SECONDARY = "0x26B64BFF"
 const COLOR_TERTIARY = "0x3370B8FF"
@@ -54,3 +56,4 @@ const COLOR_CARD = "0xD0D1B8FF"
 const COLOR_DIVIDER = "0xB0B19AFF"
 const COLOR_MUTED = "0x8A8A72FF"
 const COLOR_GRAY = "0x999999FF"
+const COLOR_PANEL_BORDER = "0x2A2D32FF"

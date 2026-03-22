@@ -33,22 +33,24 @@
       translation="[0, 1000]"
       color="0x000000AA"
       visible="false" />
+    <!-- Left: camera name + quality + server -->
     <Label id="overlayLabel"
       text=""
       width="1200"
       height="80"
       translation="[40, 1000]"
       vertAlign="center"
-      font="font:MediumBoldSystemFont"
+      font="font:SmallSystemFont"
       color="0xFFFFFFFF"
       visible="false" />
-    <Label id="overlayQuality"
+    <!-- Right: control hints -->
+    <Label id="overlayHints"
       text=""
       width="640"
       height="80"
       translation="[1240, 1000]"
       vertAlign="center"
-      horizAlign="right" 
+      horizAlign="right"
       font="font:SmallSystemFont"
       color="0x999999FF"
       visible="false" />
@@ -61,7 +63,7 @@
       horizAlign="center"
       vertAlign="center"
       font="font:MediumSystemFont"
-      color="0xDDDEC4FF" />
+      color="0xFFFFFFFF" />
 
   </children>
 

@@ -26,6 +26,13 @@ sub execute()
         return
     end if
 
+    if response.code = 401 or response.code = 403
+        m.top.success = false
+        m.top.errorMessage = "Session expired"
+        print "[StreamsTask] Token expired (HTTP " + response.code.toStr() + ")"
+        return
+    end if
+
     if response.code <> 200
         m.top.success = false
         m.top.errorMessage = "Server error (HTTP " + response.code.toStr() + ")"

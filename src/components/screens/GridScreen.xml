@@ -5,6 +5,8 @@
   <interface>
     <!-- Fires when a camera is selected. Value is the stream content node -->
     <field id="streamSelected" type="node" alwaysNotify="true" />
+    <!-- Fires when user chooses to log out -->
+    <field id="logout" type="boolean" alwaysNotify="true" />
   </interface>
 
   <script type="text/brightscript" uri="GridScreen.bs" />
@@ -33,7 +35,7 @@
       vertAlign="center"
       horizAlign="right"
       font="font:SmallSystemFont"
-      color="0x999999FF" />
+      color="0xFFFFFFFF" />
 
     <!-- Camera grid -->
     <MarkupGrid id="cameraGrid"
@@ -56,7 +58,7 @@
       horizAlign="center"
       vertAlign="center"
       font="font:MediumSystemFont"
-      color="0xDDDEC4FF" />
+      color="0xFFFFFFFF" />
   </children>
 
 </component>

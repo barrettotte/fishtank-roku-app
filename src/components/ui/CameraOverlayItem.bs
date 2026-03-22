@@ -20,4 +20,12 @@ sub onContentChanged()
     else
         m.statusDot.color = COLOR_DANGER
     end if
+
+    ' Highlight the currently playing camera
+    isCurrent = content.getField("isCurrent")
+    if isCurrent = true
+        m.nameLabel.color = COLOR_ACCENT
+    else
+        m.nameLabel.color = COLOR_WHITE
+    end if
 end sub

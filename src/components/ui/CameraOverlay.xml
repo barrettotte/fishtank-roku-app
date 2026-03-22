@@ -35,7 +35,7 @@
       width="360"
       translation="[1540, 20]"
       font="font:SmallBoldSystemFont"
-      color="0xDDDEC4FF" />
+      color="0xFFFFFFFF" />
 
     <!-- Divider -->
     <Rectangle width="360" height="1" translation="[1540, 54]" color="0x2A2D32FF" />
@@ -47,7 +47,7 @@
       numRows="22"
       drawFocusFeedback="true"
       focusBitmapBlendColor="0xDF4E1EFF"
-      vertFocusAnimationStyle="fixedFocus"
+      vertFocusAnimationStyle="fixedFocusWrap"
       itemComponentName="CameraOverlayItem" />
 
   </children>

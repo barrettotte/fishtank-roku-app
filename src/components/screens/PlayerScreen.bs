@@ -7,7 +7,7 @@ sub init()
     m.statusLabel = m.top.findNode("statusLabel")
     m.overlayBg = m.top.findNode("overlayBg")
     m.overlayLabel = m.top.findNode("overlayLabel")
-    m.overlayQuality = m.top.findNode("overlayQuality")
+    m.overlayHints = m.top.findNode("overlayHints")
 
     ' Timer to hide the camera name overlay after a few seconds
     m.overlayTimer = createObject("roSGNode", "Timer")
@@ -15,7 +15,9 @@ sub init()
     m.overlayTimer.duration = 3
     m.overlayTimer.observeField("fire", "hideOverlay")
 
-    m.quality = QUALITY_DEFAULT
+    m.quality = getQuality()
+    m.serverOverride = getServer()
+    m.currentTitle = ""
     m.qualityDialog = invalid
     m.cameraOverlay = invalid
 
@@ -43,12 +45,24 @@ sub onStreamContentChanged()
         server = STREAMS_SERVER_DEFAULT
     end if
 
+    ' Apply server override if set
+    if m.serverOverride <> "auto"
+        server = m.serverOverride
+    end if
+
     print "[PlayerScreen] Playing: " + title
     print "[PlayerScreen] Stream ID: " + streamId
     print "[PlayerScreen] Server: " + server
 
     ' Build HLS URL
     liveStreamToken = getLiveStreamToken()
+    if liveStreamToken = ""
+        m.statusLabel.text = "No stream token. Try logging in again"
+        m.statusLabel.color = COLOR_DANGER
+        print "[PlayerScreen] No live stream token"
+        return
+    end if
+
     streamUrl = "https://" + server + HLS_PATH_PREFIX + streamId + HLS_INDEX_FILE
     streamUrl = streamUrl + "?jwt=" + liveStreamToken
     streamUrl = streamUrl + "&video=" + m.quality
@@ -67,6 +81,7 @@ sub onStreamContentChanged()
     m.videoPlayer.control = "play"
     m.top.setFocus(true)
 
+    m.currentTitle = title
     m.statusLabel.text = "Loading " + title + "..."
 
     showOverlay(title)
@@ -86,11 +101,15 @@ end function
 
 ' Shows the camera name overlay at the bottom of the screen
 sub showOverlay(text as string)
-    m.overlayLabel.text = text
-    m.overlayQuality.text = getQualityLabel() + "  ·  Up: cameras  ·  Down: quality"
+    serverLabel = "Auto"
+    if m.serverOverride <> "auto"
+        serverLabel = m.serverOverride
+    end if
+    m.overlayLabel.text = text + "  ·  " + getQualityLabel() + "  ·  " + serverLabel
+    m.overlayHints.text = "Up: cameras  ·  Down: settings"
     m.overlayBg.visible = true
     m.overlayLabel.visible = true
-    m.overlayQuality.visible = true
+    m.overlayHints.visible = true
     m.overlayTimer.control = "start"
 end sub
 
@@ -98,7 +117,7 @@ end sub
 sub hideOverlay()
     m.overlayBg.visible = false
     m.overlayLabel.visible = false
-    m.overlayQuality.visible = false
+    m.overlayHints.visible = false
 end sub
 
 ' Called when the video player state changes
@@ -112,11 +131,21 @@ sub onVideoStateChanged()
         m.statusLabel.text = "Buffering..."
         m.statusLabel.visible = true
     else if state = "error"
-        m.statusLabel.text = "Playback error"
+        errorCode = m.videoPlayer.errorCode
+        errorMsg = m.videoPlayer.errorMsg
+        print "[PlayerScreen] Error code: " + errorCode.toStr()
+        print "[PlayerScreen] Error msg: " + errorMsg
+
+        ' Show a helpful message based on error type
+        if errorCode = -4 or errorCode = -1
+            m.statusLabel.text = "Stream unavailable. It may be offline"
+        else if errorCode = -3
+            m.statusLabel.text = "Network error. Check your connection"
+        else
+            m.statusLabel.text = "Playback error (" + errorCode.toStr() + ")"
+        end if
         m.statusLabel.color = COLOR_DANGER
         m.statusLabel.visible = true
-        print "[PlayerScreen] Error code: " + m.videoPlayer.errorCode.toStr()
-        print "[PlayerScreen] Error msg: " + m.videoPlayer.errorMsg
     else if state = "finished"
         m.statusLabel.text = "Stream ended"
         m.statusLabel.visible = true
@@ -132,9 +161,10 @@ sub showQualityDialog()
 
     m.qualityDialog = createObject("roSGNode", "QualityDialog")
     m.qualityDialog.observeField("selectedQuality", "onQualitySelected")
+    m.qualityDialog.observeField("selectedServer", "onServerSelected")
     m.qualityDialog.observeField("close", "onQualityDialogClose")
     m.top.appendChild(m.qualityDialog)
-    m.qualityDialog.callFunc("setCurrentQuality", m.quality)
+    m.qualityDialog.callFunc("setCurrentSettings", m.quality, m.serverOverride)
     m.qualityDialog.setFocus(true)
 end sub
 
@@ -147,7 +177,22 @@ sub onQualitySelected()
 
     if newQuality <> m.quality
         m.quality = newQuality
+        saveQuality(m.quality)
         ' Restart the stream with the new quality
+        onStreamContentChanged()
+    end if
+end sub
+
+' Called when a server is selected
+sub onServerSelected()
+    newServer = m.qualityDialog.selectedServer
+    print "[PlayerScreen] Server changed: " + newServer
+
+    if newServer <> m.serverOverride
+        m.serverOverride = newServer
+        saveServer(m.serverOverride)
+        closeQualityDialog()
+        ' Restart the stream with the new server
         onStreamContentChanged()
     end if
 end sub
@@ -169,7 +214,7 @@ end sub
 
 ' Shows the camera switcher overlay
 sub showCameraOverlay()
-    if m.cameraOverlay <> invalid or m.top.cameraList = invalid
+    if m.cameraOverlay <> invalid or m.top.cameraList = invalid or m.top.streamContent = invalid
         return
     end if
 
@@ -239,7 +284,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
     end if
 
     if key = "OK"
-        showOverlay(m.overlayLabel.text)
+        showOverlay(m.currentTitle)
         return true
     end if
 
