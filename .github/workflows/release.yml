@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -27,8 +30,7 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Upload build artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload zip to release
+        uses: softprops/action-gh-release@v2
         with:
-          name: fishtank-roku-app
-          path: out/fishtank-roku-app.zip
+          files: out/fishtank-roku-app.zip
