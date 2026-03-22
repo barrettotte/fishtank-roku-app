@@ -47,12 +47,12 @@ Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first beca
 | OK | Switch to selected camera |
 | Back | Close switcher |
 
-## Setup
+## Developer Setup
 
 ### Prerequisites
 
 - Node.js 18+
-- A Roku device on the same network as your dev machine
+- A Roku device on the same network as your dev machine. I used a Model 3820R2 Streaming Stick 4K with 15.1 software version.
 
 ### Install
 
