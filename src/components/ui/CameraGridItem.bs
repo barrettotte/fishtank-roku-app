@@ -1,0 +1,30 @@
+' Grid cell that displays a camera thumbnail, name, and online/offline dot
+
+sub init()
+    m.thumbnail = m.top.findNode("thumbnail")
+    m.nameLabel = m.top.findNode("nameLabel")
+    m.statusDot = m.top.findNode("statusDot")
+end sub
+
+' Called when itemContent is set by the MarkupGrid
+sub onContentChanged()
+    content = m.top.itemContent
+    if content = invalid
+        return
+    end if
+
+    m.nameLabel.text = content.title
+
+    ' Set thumbnail if available
+    if content.hdPosterUrl <> invalid and content.hdPosterUrl <> ""
+        m.thumbnail.uri = content.hdPosterUrl
+    end if
+
+    ' Set status dot color based on online/offline
+    status = content.getField("status")
+    if status = "online"
+        m.statusDot.color = COLOR_SECONDARY
+    else
+        m.statusDot.color = COLOR_DANGER
+    end if
+end sub

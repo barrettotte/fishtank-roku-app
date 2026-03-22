@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Grid cell showing a camera thumbnail, name, and online/offline indicator -->
+<component name="CameraGridItem" extends="Group">
+
+  <interface>
+    <field id="itemContent" type="node" onChange="onContentChanged" />
+  </interface>
+
+  <script type="text/brightscript" uri="CameraGridItem.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+
+  <children>
+    <!-- Card background -->
+    <Rectangle id="cardBg"
+      width="356"
+      height="245"
+      color="0x191C20FF" />
+
+    <!-- Thumbnail image -->
+    <Poster id="thumbnail"
+      width="356"
+      height="200"
+      loadDisplayMode="scaleToZoom" />
+
+    <!-- Bottom bar with name and status -->
+    <Rectangle id="infoBar"
+      width="356"
+      height="45"
+      translation="[0, 200]"
+      color="0x191C20FF" />
+
+    <!-- Camera name -->
+    <Label id="nameLabel"
+      width="310"
+      height="45"
+      translation="[32, 200]"
+      vertAlign="center"
+      font="font:SmallBoldSystemFont"
+      color="0xFFFFFFFF" />
+
+    <!-- Online/offline status dot -->
+    <Rectangle id="statusDot"
+      width="10"
+      height="10"
+      translation="[12, 218]"
+      color="0x26B64BFF" />
+  </children>
+
+</component>

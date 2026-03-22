@@ -30,6 +30,7 @@ sub doLogin()
 end sub
 
 ' Validates an existing access token via GET /auth
+' The validate endpoint returns { "session": "<jwt>" }, not a full session object
 sub doValidate()
     print "[AuthTask] Validating cached token..."
 
@@ -42,7 +43,22 @@ sub doValidate()
 
     url = API_BASE_URL + "/auth"
     response = httpGet(url, accessToken)
-    handleAuthResponse(response)
+
+    if response = invalid
+        m.top.success = false
+        m.top.errorMessage = "Network error"
+        print "[AuthTask] Network error"
+        return
+    end if
+
+    if response.code = 200
+        m.top.success = true
+        print "[AuthTask] Token is valid"
+    else
+        m.top.success = false
+        m.top.errorMessage = "Token expired"
+        print "[AuthTask] Token invalid (HTTP " + response.code.toStr() + ")"
+    end if
 end sub
 
 ' Parses the auth response and sets output fields
@@ -81,18 +97,6 @@ sub handleAuthResponse(response as object)
         m.top.errorMessage = "Invalid response"
         print "[AuthTask] Failed to parse response"
         return
-    end if
-
-    print "[AuthTask] Response keys: " + formatJson(json.keys())
-    if json.data <> invalid
-        print "[AuthTask] data keys: " + formatJson(json.data.keys())
-        if json.data.session <> invalid
-            print "[AuthTask] session keys: " + formatJson(json.data.session.keys())
-        else
-            print "[AuthTask] data.session is invalid"
-        end if
-    else
-        print "[AuthTask] data is invalid"
     end if
 
     session = invalid
@@ -140,7 +144,7 @@ function httpPost(url as string, body as string) as dynamic
     request.setMessagePort(createObject("roMessagePort"))
     request.asyncPostFromString(body)
 
-    msg = wait(10000, request.getMessagePort())
+    msg = wait(HTTP_TIMEOUT, request.getMessagePort())
     if type(msg) = "roUrlEvent"
         print "[AuthTask] HTTP " + msg.getResponseCode().toStr()
         return { code: msg.getResponseCode(), body: msg.getString() }
@@ -160,7 +164,7 @@ function httpGet(url as string, token as string) as dynamic
     request.setMessagePort(createObject("roMessagePort"))
     request.asyncGetToString()
 
-    msg = wait(10000, request.getMessagePort())
+    msg = wait(HTTP_TIMEOUT, request.getMessagePort())
     if type(msg) = "roUrlEvent"
         print "[AuthTask] HTTP " + msg.getResponseCode().toStr()
         return { code: msg.getResponseCode(), body: msg.getString() }

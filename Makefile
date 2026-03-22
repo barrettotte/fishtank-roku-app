@@ -17,7 +17,7 @@ ifdef FT_EMAIL
 	@echo "ft_email=$(FT_EMAIL)" >> out/staging/manifest
 	@echo "ft_password=$(FT_PASSWORD)" >> out/staging/manifest
 endif
-	@echo '{"host":"$(ROKU_DEV_TARGET)","password":"$(ROKU_DEV_PASSWORD)","rootDir":"out/staging","files":["**/*"],"deleteInstalledChannel":false}' > rokudeploy.json
+	@echo '{"host":"$(ROKU_DEV_TARGET)","password":"$(ROKU_DEV_PASSWORD)","rootDir":"out/staging","files":["**/*"]}' > rokudeploy.json
 	npx roku-deploy
 
 test:

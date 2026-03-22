@@ -3,6 +3,7 @@
 sub init()
     m.statusLabel = m.top.findNode("statusLabel")
     m.top.findNode("versionLabel").text = "v" + APP_VERSION
+    m.top.findNode("seasonLabel").text = "Season " + CURRENT_SEASON.toStr()
     m.email = ""
     m.password = ""
     m.dialogHandled = false

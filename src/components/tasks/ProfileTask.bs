@@ -1,0 +1,114 @@
+' Background task for fetching user ID and display name from profile
+
+sub init()
+    m.top.functionName = "execute"
+end sub
+
+' Dispatches to the correct action
+sub execute()
+    if m.top.action = "fetchUserId"
+        doFetchUserId()
+    else if m.top.action = "fetchProfile"
+        doFetchProfile()
+    end if
+end sub
+
+' Extracts the user ID from the JWT access token payload
+sub doFetchUserId()
+    accessToken = getAccessToken()
+    if accessToken = ""
+        m.top.complete = true
+        return
+    end if
+
+    ' JWT format: header.payload.signature
+    parts = accessToken.split(".")
+    if parts.count() < 2
+        m.top.complete = true
+        return
+    end if
+
+    ' Decode base64url payload
+    payload = parts[1]
+    remainder = payload.len() mod 4
+    if remainder = 2
+        payload = payload + "=="
+    else if remainder = 3
+        payload = payload + "="
+    end if
+    payload = payload.replace("-", "+")
+    payload = payload.replace("_", "/")
+
+    ba = createObject("roByteArray")
+    ba.fromBase64String(payload)
+    decoded = ba.toAsciiString()
+
+    json = parseJson(decoded)
+    if json = invalid
+        m.top.complete = true
+        return
+    end if
+
+    ' The "sub" (subject) claim is the user ID
+    if json.sub <> invalid
+        m.top.userId = json.sub
+    end if
+
+    m.top.complete = true
+end sub
+
+' Calls GET /profile/{userId} and extracts the display name
+sub doFetchProfile()
+    userId = m.top.userId
+    accessToken = getAccessToken()
+    if userId = "" or accessToken = ""
+        m.top.complete = true
+        return
+    end if
+
+    url = API_BASE_URL + "/profile/" + userId
+    response = doGet(url, accessToken)
+    if response = invalid or response.code <> 200
+        m.top.complete = true
+        return
+    end if
+
+    json = parseJson(response.body)
+    if json = invalid
+        m.top.complete = true
+        return
+    end if
+
+    ' Response is { data: { profile: { displayName: "..." } } }
+    profile = invalid
+    if json.data <> invalid and json.data.profile <> invalid
+        profile = json.data.profile
+    else if json.profile <> invalid
+        profile = json.profile
+    end if
+
+    if profile <> invalid and profile.displayName <> invalid and profile.displayName <> ""
+        m.top.displayName = profile.displayName
+        saveDisplayName(profile.displayName)
+    end if
+
+    m.top.complete = true
+end sub
+
+' Makes an HTTP GET request with Bearer auth
+function doGet(url as string, token as string) as dynamic
+    request = createObject("roUrlTransfer")
+    request.setUrl(url)
+    request.setCertificatesFile("common:/certs/ca-bundle.crt")
+    request.initClientCertificates()
+    request.addHeader("Authorization", "Bearer " + token)
+    request.setMessagePort(createObject("roMessagePort"))
+    request.asyncGetToString()
+
+    msg = wait(HTTP_TIMEOUT, request.getMessagePort())
+    if type(msg) = "roUrlEvent"
+        return { code: msg.getResponseCode(), body: msg.getString() }
+    end if
+
+    return invalid
+end function

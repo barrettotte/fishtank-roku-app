@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Background task for fetching the live stream list -->
+<component name="StreamsTask" extends="Task">
+
+  <interface>
+    <!-- Output: true if the request succeeded -->
+    <field id="success" type="boolean" value="false" />
+
+    <!-- Output: error message on failure -->
+    <field id="errorMessage" type="string" value="" />
+
+    <!-- Output: array of live stream objects -->
+    <field id="streams" type="assocarray" />
+
+    <!-- Output: map of stream id -> status ("online"/"offline") -->
+    <field id="streamStatus" type="assocarray" />
+
+    <!-- Output: map of stream id -> server hostname -->
+    <field id="loadBalancer" type="assocarray" />
+  </interface>
+
+  <script type="text/brightscript" uri="StreamsTask.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+
+</component>

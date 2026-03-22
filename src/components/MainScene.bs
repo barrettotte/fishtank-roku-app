@@ -62,7 +62,10 @@ sub showScreen(screenName as string)
         m.top.appendChild(m.currentScreen)
         m.currentScreen.setFocus(true)
     else if screenName = "grid"
-        print "[MainScene] GridScreen not yet implemented"
+        m.currentScreen = createObject("roSGNode", "GridScreen")
+        m.currentScreen.observeField("streamSelected", "onStreamSelected")
+        m.top.appendChild(m.currentScreen)
+        m.currentScreen.setFocus(true)
     end if
 end sub
 
@@ -70,6 +73,11 @@ end sub
 sub onLoginSuccess()
     print "[MainScene] Login successful, navigating to grid"
     showScreen("grid")
+end sub
+
+' Called when a stream is selected from the grid
+sub onStreamSelected()
+    print "[MainScene] Stream selected: " + m.currentScreen.streamSelected.title
 end sub
 
 ' Handles remote control key presses at the scene level

@@ -30,6 +30,10 @@ const REGISTRY_SECTION = "FishtankAuth"
 ' Registry key names
 const REGISTRY_ACCESS_TOKEN = "access_token"
 const REGISTRY_LIVE_STREAM_TOKEN = "live_stream_token"
+const REGISTRY_DISPLAY_NAME = "display_name"
+
+' HTTP request timeout in milliseconds
+const HTTP_TIMEOUT = 10000
 
 ' How often to refresh camera thumbnails (in seconds)
 const THUMBNAIL_REFRESH_INTERVAL = 30

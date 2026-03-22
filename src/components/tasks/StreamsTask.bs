@@ -1,0 +1,99 @@
+' Background task for fetching the live stream list from the API
+
+sub init()
+    m.top.functionName = "execute"
+end sub
+
+' Fetches GET /live-streams with the cached access token
+sub execute()
+    print "[StreamsTask] Fetching live streams..."
+
+    accessToken = getAccessToken()
+    if accessToken = ""
+        m.top.success = false
+        m.top.errorMessage = "No access token"
+        print "[StreamsTask] No access token found"
+        return
+    end if
+
+    url = API_BASE_URL + "/live-streams"
+    response = httpGet(url, accessToken)
+
+    if response = invalid
+        m.top.success = false
+        m.top.errorMessage = "Network error"
+        print "[StreamsTask] Network error"
+        return
+    end if
+
+    if response.code <> 200
+        m.top.success = false
+        m.top.errorMessage = "Server error (HTTP " + response.code.toStr() + ")"
+        print "[StreamsTask] HTTP " + response.code.toStr()
+        return
+    end if
+
+    json = parseJson(response.body)
+    if json = invalid
+        m.top.success = false
+        m.top.errorMessage = "Invalid response"
+        print "[StreamsTask] Failed to parse response"
+        return
+    end if
+
+    print "[StreamsTask] Response keys: " + formatJson(json.keys())
+
+    ' Handle both { data: { liveStreams: [...] } } and { liveStreams: [...] }
+    root = json
+    if json.data <> invalid
+        root = json.data
+    end if
+
+    if root.liveStreams = invalid
+        m.top.success = false
+        m.top.errorMessage = "No streams in response"
+        print "[StreamsTask] No liveStreams found in response"
+        return
+    end if
+
+    print "[StreamsTask] Found " + root.liveStreams.count().toStr() + " streams"
+
+    ' Log stream names for debugging
+    for each stream in root.liveStreams
+        status = "unknown"
+        if root.liveStreamStatus <> invalid and root.liveStreamStatus[stream.id] <> invalid
+            status = root.liveStreamStatus[stream.id]
+        end if
+        server = STREAMS_SERVER_DEFAULT
+        if root.loadBalancer <> invalid and root.loadBalancer[stream.id] <> invalid
+            server = root.loadBalancer[stream.id]
+        end if
+        print "[StreamsTask]   " + stream.name + " (" + status + ") -> " + server
+    end for
+
+    m.top.streams = root
+    m.top.streamStatus = root.liveStreamStatus
+    m.top.loadBalancer = root.loadBalancer
+    m.top.success = true
+    print "[StreamsTask] Done"
+end sub
+
+' Makes an HTTP GET request with Bearer auth. Returns {code, body} or invalid on timeout
+function httpGet(url as string, token as string) as dynamic
+    request = createObject("roUrlTransfer")
+    request.setUrl(url)
+    request.setCertificatesFile("common:/certs/ca-bundle.crt")
+    request.initClientCertificates()
+    request.addHeader("Authorization", "Bearer " + token)
+    request.setMessagePort(createObject("roMessagePort"))
+    request.asyncGetToString()
+
+    msg = wait(HTTP_TIMEOUT, request.getMessagePort())
+    if type(msg) = "roUrlEvent"
+        print "[StreamsTask] HTTP " + msg.getResponseCode().toStr()
+        return { code: msg.getResponseCode(), body: msg.getString() }
+    end if
+
+    print "[StreamsTask] Request timed out"
+    return invalid
+end function

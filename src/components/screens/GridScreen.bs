@@ -1,0 +1,222 @@
+' Camera grid screen that fetches and displays available streams
+
+sub init()
+    m.cameraGrid = m.top.findNode("cameraGrid")
+    m.messageLabel = m.top.findNode("messageLabel")
+    m.headerStatus = m.top.findNode("headerStatus")
+
+    m.cameraGrid.observeField("itemSelected", "onCameraSelected")
+    m.cameraGrid.visible = false
+
+    ' Store stream data for later use
+    m.streamList = []
+    m.streamStatus = {}
+    m.loadBalancer = {}
+    m.onlineCount = 0
+    m.displayName = ""
+
+    ' Set username from registry, or fetch if missing
+    m.displayName = getDisplayName()
+    print "[GridScreen] Display name from registry: '" + m.displayName + "'"
+    if m.displayName = ""
+        ' Fetch user ID from /auth then profile from /profile/{id}
+        print "[GridScreen] No display name cached, fetching..."
+        m.userIdTask = createObject("roSGNode", "ProfileTask")
+        m.userIdTask.action = "fetchUserId"
+        m.userIdTask.observeField("complete", "onUserIdReady")
+        m.userIdTask.control = "run"
+    end if
+
+    ' Start clock timer to update date/time every second
+    m.clockTimer = createObject("roSGNode", "Timer")
+    m.clockTimer.repeat = true
+    m.clockTimer.duration = 1
+    m.clockTimer.observeField("fire", "updateClock")
+    m.clockTimer.control = "start"
+    updateClock()
+
+    print "[GridScreen] Ready, fetching streams..."
+    fetchStreams()
+end sub
+
+' Called when ProfileTask has found the user ID
+sub onUserIdReady()
+    userId = m.userIdTask.userId
+    print "[GridScreen] Got user ID: " + userId
+    if userId = ""
+        print "[GridScreen] Could not get user ID"
+        return
+    end if
+
+    ' Now fetch profile with the user ID
+    m.profileTask = createObject("roSGNode", "ProfileTask")
+    m.profileTask.action = "fetchProfile"
+    m.profileTask.userId = userId
+    m.profileTask.observeField("complete", "onDisplayNameReady")
+    m.profileTask.control = "run"
+end sub
+
+' Called when ProfileTask returns the display name
+sub onDisplayNameReady()
+    m.displayName = m.profileTask.displayName
+    print "[GridScreen] Display name from profile: '" + m.displayName + "'"
+    updateClock()
+end sub
+
+' Updates the header status with current date/time and online count
+sub updateClock()
+    now = createObject("roDateTime")
+    now.toLocalTime()
+
+    ' Format: 2026-03-22 3:26 PM
+    year = now.getYear().toStr()
+    month = now.getMonth().toStr()
+    if now.getMonth() < 10
+        month = "0" + month
+    end if
+    day = now.getDayOfMonth().toStr()
+    if now.getDayOfMonth() < 10
+        day = "0" + day
+    end if
+
+    hours = now.getHours()
+    ampm = "AM"
+    if hours >= 12
+        ampm = "PM"
+    end if
+    if hours > 12
+        hours = hours - 12
+    end if
+    if hours = 0
+        hours = 12
+    end if
+
+    minutes = now.getMinutes().toStr()
+    if now.getMinutes() < 10
+        minutes = "0" + minutes
+    end if
+
+    timeStr = hours.toStr() + ":" + minutes + " " + ampm
+    dateStr = year + "-" + month + "-" + day + " " + timeStr
+
+    parts = []
+    if m.displayName <> ""
+        parts.push(m.displayName)
+    end if
+    if m.onlineCount > 0
+        parts.push(m.onlineCount.toStr() + "/" + m.streamList.count().toStr() + " online")
+    end if
+    parts.push(dateStr)
+
+    m.headerStatus.text = parts.join("  ·  ")
+end sub
+
+' Launches StreamsTask to fetch the camera list
+sub fetchStreams()
+    m.messageLabel.text = "Loading streams..."
+    m.messageLabel.visible = true
+
+    m.streamsTask = createObject("roSGNode", "StreamsTask")
+    m.streamsTask.observeField("success", "onStreamsSuccess")
+    m.streamsTask.observeField("errorMessage", "onStreamsError")
+    m.streamsTask.control = "run"
+end sub
+
+' Called when StreamsTask succeeds
+sub onStreamsSuccess()
+    if not m.streamsTask.success
+        return
+    end if
+
+    streamsData = m.streamsTask.streams
+    m.streamStatus = m.streamsTask.streamStatus
+    m.loadBalancer = m.streamsTask.loadBalancer
+
+    if streamsData = invalid or streamsData.liveStreams = invalid
+        m.messageLabel.text = "No streams found"
+        print "[GridScreen] No streams in response"
+        return
+    end if
+
+    m.streamList = streamsData.liveStreams
+    print "[GridScreen] Received " + m.streamList.count().toStr() + " streams"
+
+    buildGrid()
+end sub
+
+' Called when StreamsTask fails
+sub onStreamsError()
+    m.messageLabel.text = m.streamsTask.errorMessage
+    m.messageLabel.color = COLOR_DANGER
+    m.headerStatus.text = "Error"
+    print "[GridScreen] Error: " + m.streamsTask.errorMessage
+end sub
+
+' Builds the grid content from the stream list
+sub buildGrid()
+    content = createObject("roSGNode", "ContentNode")
+
+    onlineCount = 0
+    for each stream in m.streamList
+        item = content.createChild("ContentNode")
+        item.title = stream.name
+        item.addFields({ streamId: stream.id })
+
+        ' Set status
+        status = "offline"
+        if m.streamStatus <> invalid and m.streamStatus[stream.id] <> invalid
+            status = m.streamStatus[stream.id]
+        end if
+        item.addFields({ status: status })
+        if status = "online"
+            onlineCount = onlineCount + 1
+        end if
+
+        ' Build thumbnail URL
+        server = STREAMS_SERVER_DEFAULT
+        if m.loadBalancer <> invalid and m.loadBalancer[stream.id] <> invalid
+            server = m.loadBalancer[stream.id]
+        end if
+        encodedId = stream.id.replace("+", "%2B")
+        thumbnailUrl = "https://" + server + "/live%2B" + encodedId + ".jpeg"
+        item.hdPosterUrl = thumbnailUrl
+
+        ' Store server for HLS URL construction later
+        item.addFields({ server: server })
+
+        print "[GridScreen] Added: " + stream.name + " (" + status + ")"
+    end for
+
+    m.cameraGrid.content = content
+    m.cameraGrid.visible = true
+    m.cameraGrid.setFocus(true)
+    m.messageLabel.visible = false
+
+    m.onlineCount = onlineCount
+    updateClock()
+    print "[GridScreen] Grid built, " + onlineCount.toStr() + " online"
+end sub
+
+' Called when a camera is selected from the grid
+sub onCameraSelected()
+    selectedIndex = m.cameraGrid.itemSelected
+    selectedItem = m.cameraGrid.content.getChild(selectedIndex)
+
+    if selectedItem = invalid
+        return
+    end if
+
+    print "[GridScreen] Selected: " + selectedItem.title
+    m.top.streamSelected = selectedItem
+end sub
+
+' Handles remote key presses
+function onKeyEvent(key as string, press as boolean) as boolean
+    if not press
+        return false
+    end if
+
+    print "[GridScreen] Key: " + key
+
+    return false
+end function

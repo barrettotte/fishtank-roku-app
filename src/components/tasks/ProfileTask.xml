@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Background task for fetching user ID and profile display name -->
+<component name="ProfileTask" extends="Task">
+
+  <interface>
+    <!-- Input: "fetchUserId" or "fetchProfile" -->
+    <field id="action" type="string" />
+
+    <!-- Input/Output: user ID -->
+    <field id="userId" type="string" value="" />
+
+    <!-- Output: display name from profile -->
+    <field id="displayName" type="string" value="" />
+
+    <!-- Output: fires when the task is complete -->
+    <field id="complete" type="boolean" value="false" />
+  </interface>
+
+  <script type="text/brightscript" uri="ProfileTask.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+
+</component>

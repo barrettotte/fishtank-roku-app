@@ -9,6 +9,23 @@ sub saveTokens(accessToken as string, liveStreamToken as string)
     print "[Auth] Tokens saved to registry"
 end sub
 
+' Saves the display name to the registry
+sub saveDisplayName(displayName as string)
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    sec.write(REGISTRY_DISPLAY_NAME, displayName)
+    sec.flush()
+    print "[Auth] Display name saved: " + displayName
+end sub
+
+' Reads the display name from the registry. Returns empty string if not found
+function getDisplayName() as string
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    if sec.exists(REGISTRY_DISPLAY_NAME)
+        return sec.read(REGISTRY_DISPLAY_NAME)
+    end if
+    return ""
+end function
+
 ' Reads the access token from the registry. Returns empty string if not found
 function getAccessToken() as string
     sec = createObject("roRegistrySection", REGISTRY_SECTION)
@@ -37,6 +54,7 @@ sub clearTokens()
     sec = createObject("roRegistrySection", REGISTRY_SECTION)
     sec.delete(REGISTRY_ACCESS_TOKEN)
     sec.delete(REGISTRY_LIVE_STREAM_TOKEN)
+    sec.delete(REGISTRY_DISPLAY_NAME)
     sec.flush()
     print "[Auth] Tokens cleared from registry"
 end sub
