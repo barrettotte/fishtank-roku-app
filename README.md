@@ -16,6 +16,13 @@ Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first beca
 - Edge server override for outages (press Down)
 - Quality and server preferences persist across sessions
 
+<img src="docs/login.jpg" width="400" alt="Login Screen" />
+<img src="docs/cam-grid.jpg" width="400" alt="Camera Grid" />
+<img src="docs/cam-switch.jpg" width="400" alt="Camera Switcher" />
+<img src="docs/settings.jpg" width="400" alt="Stream Settings" />
+
+<img src="docs/home.jpg" width="400" alt="Home Screen" />
+
 ## Controls
 
 ### Camera Grid
@@ -50,7 +57,7 @@ Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first beca
 ### Install
 
 ```bash
-git clone https://github.com/your-username/fishtank-roku-app.git
+git clone https://github.com/barrettotte/fishtank-roku-app.git
 cd fishtank-roku-app
 npm install
 cp .env.example .env
@@ -85,6 +92,17 @@ make debug
 ```
 
 All `print` statements in the code show up here.
+
+### Regenerate App Icons and Splash Screens
+
+Requires [ImageMagick](https://imagemagick.org/). Generates channel posters and splash screens from the logo:
+
+```sh
+magick -size 540x405 xc:'#191C20' \( src/images/logo-stripe.png -resize 360x \) -gravity center -composite src/images/channel-poster_fhd.png
+magick -size 336x210 xc:'#191C20' \( src/images/logo-stripe.png -resize 220x \) -gravity center -composite src/images/channel-poster_hd.png
+magick -size 1920x1080 xc:'#191C20' \( src/images/logo-stripe.png -resize 600x \) -gravity center -composite src/images/splash-screen_fhd.png
+magick -size 1280x720 xc:'#191C20' \( src/images/logo-stripe.png -resize 400x \) -gravity center -composite src/images/splash-screen_hd.png
+```
 
 ### Other Commands
 
