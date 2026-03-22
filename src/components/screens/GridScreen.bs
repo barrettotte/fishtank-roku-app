@@ -35,6 +35,12 @@ sub init()
     m.clockTimer.control = "start"
     updateClock()
 
+    ' Start thumbnail refresh timer
+    m.thumbTimer = createObject("roSGNode", "Timer")
+    m.thumbTimer.repeat = true
+    m.thumbTimer.duration = THUMBNAIL_REFRESH_INTERVAL
+    m.thumbTimer.observeField("fire", "refreshThumbnails")
+
     print "[GridScreen] Ready, fetching streams..."
     fetchStreams()
 end sub
@@ -194,7 +200,38 @@ sub buildGrid()
 
     m.onlineCount = onlineCount
     updateClock()
+
+    ' Start periodic thumbnail refresh
+    m.thumbTimer.control = "start"
+
     print "[GridScreen] Grid built, " + onlineCount.toStr() + " online"
+end sub
+
+' Refreshes all thumbnail URLs with a cache-busting timestamp
+sub refreshThumbnails()
+    content = m.cameraGrid.content
+    if content = invalid
+        return
+    end if
+
+    ' Round timestamp to THUMBNAIL_REFRESH_INTERVAL for consistent cache busting
+    now = createObject("roDateTime")
+    timestamp = now.asSeconds()
+    rounded = timestamp - (timestamp mod THUMBNAIL_REFRESH_INTERVAL)
+    cacheBuster = "?refresh=" + rounded.toStr()
+
+    for i = 0 to content.getChildCount() - 1
+        item = content.getChild(i)
+        streamId = item.getField("streamId")
+        server = item.getField("server")
+
+        if streamId <> invalid and server <> invalid
+            encodedId = streamId.replace("+", "%2B")
+            item.hdPosterUrl = "https://" + server + "/live%2B" + encodedId + ".jpeg" + cacheBuster
+        end if
+    end for
+
+    print "[GridScreen] Thumbnails refreshed"
 end sub
 
 ' Called when a camera is selected from the grid

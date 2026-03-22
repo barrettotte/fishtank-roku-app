@@ -36,7 +36,7 @@ const REGISTRY_DISPLAY_NAME = "display_name"
 const HTTP_TIMEOUT = 10000
 
 ' How often to refresh camera thumbnails (in seconds)
-const THUMBNAIL_REFRESH_INTERVAL = 30
+const THUMBNAIL_REFRESH_INTERVAL = 90
 
 ' Current Fishtank season number (used for map image URLs)
 const CURRENT_SEASON = 5
