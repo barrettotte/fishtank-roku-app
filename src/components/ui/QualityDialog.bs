@@ -1,0 +1,80 @@
+' Dialog for selecting stream quality (low/medium/high)
+
+sub init()
+    m.options = [
+        { label: "High", value: QUALITY_HIGH },
+        { label: "Medium", value: QUALITY_MEDIUM },
+        { label: "Low", value: QUALITY_LOW }
+    ]
+
+    m.optionBgs = [
+        m.top.findNode("optionBg0"),
+        m.top.findNode("optionBg1"),
+        m.top.findNode("optionBg2")
+    ]
+
+    m.selectedIndex = 0
+    updateHighlight()
+
+    print "[QualityDialog] Ready"
+end sub
+
+' Sets the initial selection to match the current quality
+sub setCurrentQuality(quality as string)
+    for i = 0 to m.options.count() - 1
+        if m.options[i].value = quality
+            m.selectedIndex = i
+            updateHighlight()
+            return
+        end if
+    end for
+end sub
+
+' Updates the highlight to show which option is selected
+sub updateHighlight()
+    for i = 0 to m.optionBgs.count() - 1
+        if i = m.selectedIndex
+            m.optionBgs[i].color = COLOR_SECONDARY
+        else
+            m.optionBgs[i].color = "0x2A2D32FF"
+        end if
+    end for
+end sub
+
+' Handles remote key presses
+function onKeyEvent(key as string, press as boolean) as boolean
+    if not press
+        return false
+    end if
+    print "[QualityDialog] Key: " + key
+
+    if key = "up"
+        if m.selectedIndex > 0
+            m.selectedIndex = m.selectedIndex - 1
+            updateHighlight()
+        end if
+        return true
+    end if
+
+    if key = "down"
+        if m.selectedIndex < m.options.count() - 1
+            m.selectedIndex = m.selectedIndex + 1
+            updateHighlight()
+        end if
+        return true
+    end if
+
+    if key = "OK"
+        selected = m.options[m.selectedIndex]
+        print "[QualityDialog] Selected: " + selected.label + " (" + selected.value + ")"
+        m.top.selectedQuality = selected.value
+        return true
+    end if
+
+    if key = "back" or key = "options"
+        m.top.close = true
+        return true
+    end if
+
+    return true
+end function

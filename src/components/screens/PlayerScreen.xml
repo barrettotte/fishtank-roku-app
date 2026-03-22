@@ -33,12 +33,22 @@
       visible="false" />
     <Label id="overlayLabel"
       text=""
-      width="1880"
+      width="1200"
       height="80"
       translation="[40, 1000]"
       vertAlign="center"
       font="font:MediumBoldSystemFont"
       color="0xFFFFFFFF"
+      visible="false" />
+    <Label id="overlayQuality"
+      text=""
+      width="640"
+      height="80"
+      translation="[1240, 1000]"
+      vertAlign="center"
+      horizAlign="right" 
+      font="font:SmallSystemFont"
+      color="0x999999FF"
       visible="false" />
 
     <!-- Loading/error message -->
