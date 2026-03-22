@@ -1,0 +1,128 @@
+' Full-screen HLS video player for a single camera stream
+
+sub init()
+    m.videoPlayer = m.top.findNode("videoPlayer")
+    m.videoPlayer.observeField("state", "onVideoStateChanged")
+
+    m.statusLabel = m.top.findNode("statusLabel")
+    m.overlayBg = m.top.findNode("overlayBg")
+    m.overlayLabel = m.top.findNode("overlayLabel")
+
+    ' Timer to hide the camera name overlay after a few seconds
+    m.overlayTimer = createObject("roSGNode", "Timer")
+    m.overlayTimer.repeat = false
+    m.overlayTimer.duration = 3
+    m.overlayTimer.observeField("fire", "hideOverlay")
+
+    m.quality = QUALITY_DEFAULT
+
+    print "[PlayerScreen] Ready"
+end sub
+
+' Called when streamContent is set by the parent
+sub onStreamContentChanged()
+    content = m.top.streamContent
+    if content = invalid
+        return
+    end if
+
+    streamId = content.getField("streamId")
+    server = content.getField("server")
+    title = content.title
+
+    if streamId = invalid or streamId = ""
+        m.statusLabel.text = "No stream ID"
+        print "[PlayerScreen] No stream ID"
+        return
+    end if
+
+    if server = invalid or server = ""
+        server = STREAMS_SERVER_DEFAULT
+    end if
+
+    print "[PlayerScreen] Playing: " + title
+    print "[PlayerScreen] Stream ID: " + streamId
+    print "[PlayerScreen] Server: " + server
+
+    ' Build HLS URL
+    liveStreamToken = getLiveStreamToken()
+    streamUrl = "https://" + server + HLS_PATH_PREFIX + streamId + HLS_INDEX_FILE
+    streamUrl = streamUrl + "?jwt=" + liveStreamToken
+    streamUrl = streamUrl + "&video=" + m.quality
+
+    print "[PlayerScreen] URL: " + streamUrl
+
+    ' Set up the video node
+    videoContent = createObject("roSGNode", "ContentNode")
+    videoContent.url = streamUrl
+    videoContent.title = title
+    videoContent.streamformat = "hls"
+    videoContent.live = true
+
+    m.videoPlayer.content = videoContent
+    m.videoPlayer.visible = true
+    m.videoPlayer.control = "play"
+    m.videoPlayer.setFocus(true)
+
+    m.statusLabel.text = "Loading " + title + "..."
+
+    showOverlay(title)
+end sub
+
+' Shows the camera name overlay at the bottom of the screen
+sub showOverlay(text as string)
+    m.overlayLabel.text = text
+    m.overlayBg.visible = true
+    m.overlayLabel.visible = true
+    m.overlayTimer.control = "start"
+end sub
+
+' Hides the camera name overlay
+sub hideOverlay()
+    m.overlayBg.visible = false
+    m.overlayLabel.visible = false
+end sub
+
+' Called when the video player state changes
+sub onVideoStateChanged()
+    state = m.videoPlayer.state
+    print "[PlayerScreen] Video state: " + state
+
+    if state = "playing"
+        m.statusLabel.visible = false
+    else if state = "buffering"
+        m.statusLabel.text = "Buffering..."
+        m.statusLabel.visible = true
+    else if state = "error"
+        m.statusLabel.text = "Playback error"
+        m.statusLabel.color = COLOR_DANGER
+        m.statusLabel.visible = true
+        print "[PlayerScreen] Error code: " + m.videoPlayer.errorCode.toStr()
+        print "[PlayerScreen] Error msg: " + m.videoPlayer.errorMsg
+    else if state = "finished"
+        m.statusLabel.text = "Stream ended"
+        m.statusLabel.visible = true
+    end if
+end sub
+
+' Handles remote key presses
+function onKeyEvent(key as string, press as boolean) as boolean
+    if not press
+        return false
+    end if
+    print "[PlayerScreen] Key: " + key
+
+    if key = "back"
+        ' Stop video and return to grid
+        m.videoPlayer.control = "stop"
+        m.top.close = true
+        return true
+    end if
+
+    if key = "OK" or key = "up"
+        showOverlay(m.overlayLabel.text)
+        return true
+    end if
+
+    return false
+end function

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Full-screen HLS video player for a single camera stream -->
+<component name="PlayerScreen" extends="Group">
+
+  <interface>
+    <!-- Input: stream content node with streamId, server, title fields -->
+    <field id="streamContent" type="node" onChange="onStreamContentChanged" />
+    <!-- Fires when user presses back to return to grid -->
+    <field id="close" type="boolean" alwaysNotify="true" />
+  </interface>
+
+  <script type="text/brightscript" uri="PlayerScreen.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+
+  <children>
+    <!-- Black background behind video -->
+    <Rectangle id="background" width="1920" height="1080" color="0x000000FF" />
+
+    <!-- Video player -->
+    <Video id="videoPlayer"
+      width="1920"
+      height="1080"
+      translation="[0, 0]"
+      visible="false" />
+
+    <!-- Camera name overlay (shown briefly when stream starts) -->
+    <Rectangle id="overlayBg"
+      width="1920"
+      height="80"
+      translation="[0, 1000]"
+      color="0x000000AA"
+      visible="false" />
+    <Label id="overlayLabel"
+      text=""
+      width="1880"
+      height="80"
+      translation="[40, 1000]"
+      vertAlign="center"
+      font="font:MediumBoldSystemFont"
+      color="0xFFFFFFFF"
+      visible="false" />
+
+    <!-- Loading/error message -->
+    <Label id="statusLabel"
+      text="Loading..."
+      width="1920"
+      height="1080"
+      horizAlign="center"
+      vertAlign="center"
+      font="font:MediumSystemFont"
+      color="0xDDDEC4FF" />
+
+  </children>
+
+</component>

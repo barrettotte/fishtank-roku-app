@@ -22,7 +22,7 @@ const QUALITY_MEDIUM = "2mbps"
 const QUALITY_HIGH = "maxbps"
 
 ' Default quality to use on first launch
-const QUALITY_DEFAULT = QUALITY_HIGH
+const QUALITY_DEFAULT = "maxbps"
 
 ' Registry section name for storing auth tokens
 const REGISTRY_SECTION = "FishtankAuth"

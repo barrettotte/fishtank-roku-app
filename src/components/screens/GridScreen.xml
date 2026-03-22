@@ -44,6 +44,7 @@
       itemSpacing="[10, 10]"
       drawFocusFeedback="true"
       focusBitmapBlendColor="0xDF4E1EFF"
+      vertFocusAnimationStyle="fixedFocus"
       itemComponentName="CameraGridItem" />
 
     <!-- Loading/error message -->
