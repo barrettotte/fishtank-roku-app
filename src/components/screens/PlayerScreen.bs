@@ -17,6 +17,7 @@ sub init()
 
     m.quality = QUALITY_DEFAULT
     m.qualityDialog = invalid
+    m.cameraOverlay = invalid
 
     print "[PlayerScreen] Ready"
 end sub
@@ -86,7 +87,7 @@ end function
 ' Shows the camera name overlay at the bottom of the screen
 sub showOverlay(text as string)
     m.overlayLabel.text = text
-    m.overlayQuality.text = getQualityLabel() + "  ·  Press Down for quality"
+    m.overlayQuality.text = getQualityLabel() + "  ·  Up: cameras  ·  Down: quality"
     m.overlayBg.visible = true
     m.overlayLabel.visible = true
     m.overlayQuality.visible = true
@@ -166,6 +167,46 @@ sub closeQualityDialog()
     end if
 end sub
 
+' Shows the camera switcher overlay
+sub showCameraOverlay()
+    if m.cameraOverlay <> invalid or m.top.cameraList = invalid
+        return
+    end if
+
+    print "[PlayerScreen] Opening camera overlay"
+    m.cameraOverlay = createObject("roSGNode", "CameraOverlay")
+    m.cameraOverlay.cameraList = m.top.cameraList
+    m.cameraOverlay.currentStreamId = m.top.streamContent.getField("streamId")
+    m.cameraOverlay.observeField("selectedCamera", "onCameraOverlaySelected")
+    m.cameraOverlay.observeField("close", "onCameraOverlayClose")
+    m.top.appendChild(m.cameraOverlay)
+    m.cameraOverlay.callFunc("populateGrid")
+end sub
+
+' Called when a camera is selected from the overlay
+sub onCameraOverlaySelected()
+    selected = m.cameraOverlay.selectedCamera
+    print "[PlayerScreen] Switching to: " + selected.title
+
+    closeCameraOverlay()
+    m.top.streamContent = selected
+end sub
+
+' Called when the camera overlay is dismissed
+sub onCameraOverlayClose()
+    closeCameraOverlay()
+end sub
+
+' Removes the camera overlay and returns focus
+sub closeCameraOverlay()
+    if m.cameraOverlay <> invalid
+        m.top.removeChild(m.cameraOverlay)
+        m.cameraOverlay = invalid
+        m.top.setFocus(true)
+        print "[PlayerScreen] Camera overlay closed"
+    end if
+end sub
+
 ' Handles remote key presses
 function onKeyEvent(key as string, press as boolean) as boolean
     if not press
@@ -174,13 +215,21 @@ function onKeyEvent(key as string, press as boolean) as boolean
     print "[PlayerScreen] Key: " + key
 
     if key = "back"
-        ' Close quality dialog if open, otherwise exit player
         if m.qualityDialog <> invalid
             closeQualityDialog()
             return true
         end if
+        if m.cameraOverlay <> invalid
+            closeCameraOverlay()
+            return true
+        end if
         m.videoPlayer.control = "stop"
         m.top.close = true
+        return true
+    end if
+
+    if key = "up"
+        showCameraOverlay()
         return true
     end if
 
@@ -189,7 +238,7 @@ function onKeyEvent(key as string, press as boolean) as boolean
         return true
     end if
 
-    if key = "OK" or key = "up"
+    if key = "OK"
         showOverlay(m.overlayLabel.text)
         return true
     end if

@@ -7,6 +7,8 @@
     <field id="streamContent" type="node" onChange="onStreamContentChanged" />
     <!-- Fires when user presses back to return to grid -->
     <field id="close" type="boolean" alwaysNotify="true" />
+    <!-- Input: camera list content node for the camera switcher overlay -->
+    <field id="cameraList" type="node" />
   </interface>
 
   <script type="text/brightscript" uri="PlayerScreen.bs" />

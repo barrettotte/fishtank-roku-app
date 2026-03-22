@@ -1,0 +1,23 @@
+' List item for the camera switcher overlay
+
+sub init()
+    m.nameLabel = m.top.findNode("nameLabel")
+    m.statusDot = m.top.findNode("statusDot")
+end sub
+
+' Called when itemContent is set by the list
+sub onContentChanged()
+    content = m.top.itemContent
+    if content = invalid
+        return
+    end if
+
+    m.nameLabel.text = content.title
+
+    status = content.getField("status")
+    if status = "online"
+        m.statusDot.color = COLOR_SECONDARY
+    else
+        m.statusDot.color = COLOR_DANGER
+    end if
+end sub

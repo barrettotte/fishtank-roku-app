@@ -70,6 +70,7 @@ sub showScreen(screenName as string)
         m.currentScreen = createObject("roSGNode", "PlayerScreen")
         m.currentScreen.observeField("close", "onPlayerClose")
         m.top.appendChild(m.currentScreen)
+        m.currentScreen.cameraList = m.cameraListContent
         m.currentScreen.streamContent = m.selectedStream
     end if
 
@@ -84,6 +85,11 @@ end sub
 ' Called when a stream is selected from the grid
 sub onStreamSelected()
     m.selectedStream = m.currentScreen.streamSelected
+    ' Save the camera list for the player's camera switcher overlay
+    cameraGrid = m.currentScreen.findNode("cameraGrid")
+    if cameraGrid <> invalid
+        m.cameraListContent = cameraGrid.content
+    end if
     print "[MainScene] Stream selected: " + m.selectedStream.title
     showScreen("player")
 end sub

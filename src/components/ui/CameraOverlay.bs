@@ -1,0 +1,68 @@
+' Overlay for switching cameras without leaving the player
+
+sub init()
+    m.cameraListNode = m.top.findNode("cameraList")
+    m.cameraListNode.observeField("itemSelected", "onItemSelected")
+
+    print "[CameraOverlay] Ready"
+end sub
+
+' Populates the list from the cameraList content node
+sub populateGrid()
+    cameraList = m.top.cameraList
+    if cameraList = invalid
+        return
+    end if
+
+    content = createObject("roSGNode", "ContentNode")
+    currentIndex = 0
+
+    for i = 0 to cameraList.getChildCount() - 1
+        source = cameraList.getChild(i)
+        item = content.createChild("ContentNode")
+        item.title = source.title
+        item.addFields({ streamId: source.getField("streamId") })
+        item.addFields({ server: source.getField("server") })
+        item.addFields({ status: source.getField("status") })
+
+        ' Track which camera is currently playing
+        if source.getField("streamId") = m.top.currentStreamId
+            currentIndex = i
+        end if
+    end for
+
+    m.cameraListNode.content = content
+    m.cameraListNode.jumpToItem = currentIndex
+    m.cameraListNode.setFocus(true)
+
+    print "[CameraOverlay] Loaded " + content.getChildCount().toStr() + " cameras"
+end sub
+
+' Called when a camera is selected
+sub onItemSelected()
+    selectedIndex = m.cameraListNode.itemSelected
+    selectedItem = m.cameraListNode.content.getChild(selectedIndex)
+
+    if selectedItem = invalid
+        return
+    end if
+
+    print "[CameraOverlay] Selected: " + selectedItem.title
+    m.top.selectedCamera = selectedItem
+end sub
+
+' Handles remote key presses
+function onKeyEvent(key as string, press as boolean) as boolean
+    if not press
+        return false
+    end if
+
+    print "[CameraOverlay] Key: " + key
+
+    if key = "back" or key = "up"
+        m.top.close = true
+        return true
+    end if
+
+    return true
+end function

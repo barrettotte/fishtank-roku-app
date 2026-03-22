@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- Overlay for switching cameras without leaving the player -->
+<component name="CameraOverlay" extends="Group">
+
+  <interface>
+    <!-- Input: ContentNode with camera children (same as grid content) -->
+    <field id="cameraList" type="node" />
+    <!-- Input: currently playing stream ID to highlight -->
+    <field id="currentStreamId" type="string" />
+    <!-- Output: fires with the selected camera content node -->
+    <field id="selectedCamera" type="node" alwaysNotify="true" />
+    <!-- Output: fires when the overlay is dismissed -->
+    <field id="close" type="boolean" alwaysNotify="true" />
+    <!-- Function: populates the list from cameraList -->
+    <function name="populateGrid" />
+  </interface>
+
+  <script type="text/brightscript" uri="CameraOverlay.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+
+  <children>
+    <!-- Semi-transparent backdrop -->
+    <Rectangle id="backdrop" width="1920" height="1080" color="0x00000088" />
+
+    <!-- Panel on the right side -->
+    <Rectangle id="panelBg"
+      width="400"
+      height="1080"
+      translation="[1520, 0]"
+      color="0x191C20EE" />
+
+    <!-- Title -->
+    <Label id="titleLabel"
+      text="Switch Camera"
+      width="360"
+      translation="[1540, 20]"
+      font="font:SmallBoldSystemFont"
+      color="0xDDDEC4FF" />
+
+    <!-- Divider -->
+    <Rectangle width="360" height="1" translation="[1540, 54]" color="0x2A2D32FF" />
+
+    <!-- Camera name list -->
+    <MarkupList id="cameraList"
+      translation="[1540, 64]"
+      itemSize="[360, 44]"
+      numRows="22"
+      drawFocusFeedback="true"
+      focusBitmapBlendColor="0xDF4E1EFF"
+      vertFocusAnimationStyle="fixedFocus"
+      itemComponentName="CameraOverlayItem" />
+
+  </children>
+
+</component>

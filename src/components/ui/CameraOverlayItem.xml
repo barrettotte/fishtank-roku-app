@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<!-- List item for the camera switcher overlay -->
+<component name="CameraOverlayItem" extends="Group">
+
+  <interface>
+    <field id="itemContent" type="node" onChange="onContentChanged" />
+  </interface>
+
+  <script type="text/brightscript" uri="CameraOverlayItem.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
+
+  <children>
+    <!-- Status dot -->
+    <Rectangle id="statusDot"
+      width="10"
+      height="10"
+      translation="[4, 17]"
+      color="0x26B64BFF" />
+
+    <!-- Camera name -->
+    <Label id="nameLabel"
+      width="330"
+      height="44"
+      translation="[24, 0]"
+      vertAlign="center"
+      font="font:SmallSystemFont"
+      color="0xFFFFFFFF" />
+  </children>
+
+</component>
