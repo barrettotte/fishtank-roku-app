@@ -47,6 +47,16 @@ Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first beca
 | OK | Switch to selected camera |
 | Back | Close switcher |
 
+## Install (Sideload)
+
+1. On your Roku remote, press: **Home Home Home Up Up Right Left Right Left Right** to enable Developer Mode
+2. Note the IP address and set a password
+3. Download the latest `fishtank-roku-app-vX.X.X.zip` from [Releases](https://github.com/barrettotte/fishtank-roku-app/releases)
+4. Open `http://<your-roku-ip>` in a browser and log in with username `rokudev` and your password
+5. Click **Upload**, select the zip, and click **Install**
+
+> **Note:** This app is not available on the Roku Channel Store. It uses an unofficial, reverse-engineered API and is not affiliated with Fishtank.live. Sideloading is the only way to install it.
+
 ## Developer Setup
 
 ### Prerequisites
