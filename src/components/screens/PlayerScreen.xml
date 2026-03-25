@@ -13,7 +13,7 @@
 
   <script type="text/brightscript" uri="PlayerScreen.bs" />
   <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
-  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/registry.bs" />
 
   <children>
     <!-- Black background behind video -->

@@ -21,6 +21,6 @@
 
   <script type="text/brightscript" uri="StreamsTask.bs" />
   <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
-  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/registry.bs" />
 
 </component>

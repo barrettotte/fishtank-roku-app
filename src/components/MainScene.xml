@@ -8,7 +8,7 @@
 
   <script type="text/brightscript" uri="MainScene.bs" />
   <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
-  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/registry.bs" />
 
   <children>
     <Rectangle id="background" width="1920" height="1080" color="0x191C20FF" />

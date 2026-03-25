@@ -2,7 +2,7 @@
 
 sub init()
     m.statusLabel = m.top.findNode("statusLabel")
-    m.top.findNode("versionLabel").text = "Unofficial Roku App · v" + APP_VERSION
+    m.top.findNode("versionLabel").text = "Unofficial Roku App · v" + getAppVersion()
     m.top.findNode("seasonLabel").text = "Season " + CURRENT_SEASON.toStr()
     m.email = ""
     m.password = ""

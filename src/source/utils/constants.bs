@@ -1,7 +1,17 @@
 ' App-wide constants
 
-' App version displayed in the AboutDialog
-const APP_VERSION = "0.1.0"
+' App version - injected from package.json at build time via Makefile
+const APP_VERSION = "0.0.0"
+
+' Reads the app version from the manifest (set at build time)
+function getAppVersion() as string
+    appInfo = createObject("roAppInfo")
+    version = appInfo.getValue("app_version")
+    if version <> ""
+        return version
+    end if
+    return APP_VERSION
+end function
 
 ' Base URL for all REST API calls
 const API_BASE_URL = "https://api.fishtank.live/v1"

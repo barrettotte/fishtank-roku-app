@@ -18,6 +18,6 @@
 
   <script type="text/brightscript" uri="ProfileTask.bs" />
   <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
-  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/registry.bs" />
 
 </component>

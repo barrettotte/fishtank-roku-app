@@ -54,6 +54,9 @@ sub onStreamContentChanged()
     print "[PlayerScreen] Stream ID: " + streamId
     print "[PlayerScreen] Server: " + server
 
+    ' Stop any currently playing stream before switching
+    m.videoPlayer.control = "stop"
+
     ' Build HLS URL
     liveStreamToken = getLiveStreamToken()
     if liveStreamToken = ""

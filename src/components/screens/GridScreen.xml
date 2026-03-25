@@ -11,7 +11,7 @@
 
   <script type="text/brightscript" uri="GridScreen.bs" />
   <script type="text/brightscript" uri="pkg:/source/utils/constants.bs" />
-  <script type="text/brightscript" uri="pkg:/source/utils/auth.bs" />
+  <script type="text/brightscript" uri="pkg:/source/utils/registry.bs" />
 
   <children>
     <!-- Dark background -->

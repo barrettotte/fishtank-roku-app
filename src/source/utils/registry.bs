@@ -1,4 +1,4 @@
-' Token storage and retrieval using Roku registry
+' Registry helpers for persisting app state (auth tokens, preferences)
 
 ' Saves the access token and live stream token to the registry
 sub saveTokens(accessToken as string, liveStreamToken as string)
