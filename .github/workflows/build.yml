@@ -28,6 +28,15 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Inject version into manifest
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          sed -i "s/major_version=.*/major_version=$(echo $VERSION | cut -d. -f1)/" out/staging/manifest
+          sed -i "s/minor_version=.*/minor_version=$(echo $VERSION | cut -d. -f2)/" out/staging/manifest
+          sed -i "s/build_version=.*/build_version=$(echo $VERSION | cut -d. -f3)/" out/staging/manifest
+          echo "app_version=$VERSION" >> out/staging/manifest
+          cd out/staging && zip -r ../fishtank-roku-app.zip . -x "*.map"
+
       - name: Upload build artifact
         if: github.ref == 'refs/heads/master'
         uses: actions/upload-artifact@v4
