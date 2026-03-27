@@ -9,6 +9,8 @@
     <field id="close" type="boolean" alwaysNotify="true" />
     <!-- Input: camera list content node for the camera switcher overlay -->
     <field id="cameraList" type="node" />
+    <!-- Set to true to refresh the stream URL with fresh tokens -->
+    <field id="refreshStream" type="boolean" alwaysNotify="true" onChange="onRefreshStream" />
   </interface>
 
   <script type="text/brightscript" uri="PlayerScreen.bs" />

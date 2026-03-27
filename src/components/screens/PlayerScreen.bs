@@ -90,6 +90,14 @@ sub onStreamContentChanged()
     showOverlay(title)
 end sub
 
+' Called when MainScene signals that tokens were refreshed. Rebuilds the stream URL
+sub onRefreshStream()
+    if m.top.streamContent <> invalid
+        print "[PlayerScreen] Token refreshed, rebuilding stream URL"
+        onStreamContentChanged()
+    end if
+end sub
+
 ' Returns a human-readable label for the current quality value
 function getQualityLabel() as string
     if m.quality = QUALITY_HIGH

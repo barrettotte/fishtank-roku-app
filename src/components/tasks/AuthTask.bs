@@ -29,8 +29,7 @@ sub doLogin()
     handleAuthResponse(response)
 end sub
 
-' Validates an existing access token via GET /auth
-' The validate endpoint returns { "session": "<jwt>" }, not a full session object
+' Validates an existing access token via GET /auth and refreshes tokens
 sub doValidate()
     print "[AuthTask] Validating cached token..."
 
@@ -51,14 +50,39 @@ sub doValidate()
         return
     end if
 
-    if response.code = 200
-        m.top.success = true
-        print "[AuthTask] Token is valid"
-    else
+    if response.code <> 200
         m.top.success = false
         m.top.errorMessage = "Token expired"
         print "[AuthTask] Token invalid (HTTP " + response.code.toStr() + ")"
+        return
     end if
+
+    ' Parse response and refresh tokens if available
+    ' Web app reads response.data.session which contains fresh tokens
+    json = parseJson(response.body)
+    if json <> invalid
+        session = invalid
+        if json.data <> invalid and json.data.session <> invalid
+            session = json.data.session
+        else if json.session <> invalid
+            session = json.session
+        end if
+
+        ' Update tokens if the response contains a full session object
+        if session <> invalid and type(session) = "roAssociativeArray"
+            if session.access_token <> invalid
+                liveStreamToken = ""
+                if session.live_stream_token <> invalid
+                    liveStreamToken = session.live_stream_token
+                end if
+                saveTokens(session.access_token, liveStreamToken)
+                print "[AuthTask] Tokens refreshed from validate response"
+            end if
+        end if
+    end if
+
+    m.top.success = true
+    print "[AuthTask] Token is valid"
 end sub
 
 ' Parses the auth response and sets output fields

@@ -7,6 +7,12 @@ sub init()
 
     m.currentScreen = invalid
 
+    ' Timer to refresh auth tokens before the 30-minute JWT expiry
+    m.tokenRefreshTimer = createObject("roSGNode", "Timer")
+    m.tokenRefreshTimer.repeat = true
+    m.tokenRefreshTimer.duration = 1500 ' 25 minutes
+    m.tokenRefreshTimer.observeField("fire", "onTokenRefreshTimer")
+
     print "[MainScene] App initialized"
 
     ' Check for a cached auth token before showing login
@@ -34,6 +40,7 @@ end sub
 sub onValidateResult()
     if m.authTask.success
         print "[MainScene] Cached token is valid, going to grid"
+        m.tokenRefreshTimer.control = "start"
         showScreen("grid")
     end if
 end sub
@@ -80,6 +87,7 @@ end sub
 ' Called when LoginScreen fires a successful login
 sub onLoginSuccess()
     print "[MainScene] Login successful, navigating to grid"
+    m.tokenRefreshTimer.control = "start"
     showScreen("grid")
 end sub
 
@@ -101,9 +109,32 @@ sub onPlayerClose()
     showScreen("grid")
 end sub
 
+' Fires every 25 minutes to refresh auth tokens before the 30-minute JWT expiry
+sub onTokenRefreshTimer()
+    print "[MainScene] Refreshing auth tokens..."
+    m.refreshAuthTask = createObject("roSGNode", "AuthTask")
+    m.refreshAuthTask.action = "validate"
+    m.refreshAuthTask.observeField("success", "onTokenRefreshResult")
+    m.refreshAuthTask.control = "run"
+end sub
+
+' Called when the token refresh completes
+sub onTokenRefreshResult()
+    if m.refreshAuthTask.success
+        print "[MainScene] Tokens refreshed successfully"
+        ' If the player is active, tell it to rebuild the stream URL with the fresh token
+        if m.top.currentScreen = "player" and m.currentScreen <> invalid
+            m.currentScreen.refreshStream = true
+        end if
+    else
+        print "[MainScene] Token refresh failed: " + m.refreshAuthTask.errorMessage
+    end if
+end sub
+
 ' Called when user logs out from the grid screen
 sub onLogout()
     print "[MainScene] Logged out, returning to login"
+    m.tokenRefreshTimer.control = "stop"
     showScreen("login")
 end sub
 
