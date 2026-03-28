@@ -7,6 +7,8 @@
     <field id="streamSelected" type="node" alwaysNotify="true" />
     <!-- Fires when user chooses to log out -->
     <field id="logout" type="boolean" alwaysNotify="true" />
+    <!-- Fires when user requests a token refresh from the header button -->
+    <field id="requestRefresh" type="boolean" alwaysNotify="true" />
   </interface>
 
   <script type="text/brightscript" uri="GridScreen.bs" />

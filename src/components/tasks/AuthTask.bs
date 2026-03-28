@@ -68,15 +68,20 @@ sub doValidate()
             session = json.session
         end if
 
-        ' Update tokens if the response contains a full session object
+        ' Update tokens if the response contains a full session object.
+        ' Only overwrite live_stream_token if a new one is provided,
+        ' otherwise keep the existing one so we don't break HLS playback.
         if session <> invalid and type(session) = "roAssociativeArray"
             if session.access_token <> invalid
-                liveStreamToken = ""
-                if session.live_stream_token <> invalid
-                    liveStreamToken = session.live_stream_token
+                if session.live_stream_token <> invalid and session.live_stream_token <> ""
+                    saveTokens(session.access_token, session.live_stream_token)
+                    print "[AuthTask] Both tokens refreshed from validate response"
+                else
+                    ' Only update access_token, preserve existing live_stream_token
+                    existingLiveToken = getLiveStreamToken()
+                    saveTokens(session.access_token, existingLiveToken)
+                    print "[AuthTask] Access token refreshed (live_stream_token preserved)"
                 end if
-                saveTokens(session.access_token, liveStreamToken)
-                print "[AuthTask] Tokens refreshed from validate response"
             end if
         end if
     end if

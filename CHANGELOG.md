@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.3
+
+Fixes stale token on Roku sleep and adds manual token refresh option.
+
 ## v0.1.2
 
 Fixes streams dying from stale tokens by adding token refresh timer every 25 minutes.

@@ -15,6 +15,8 @@ Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first beca
 - Stream quality selection: High / Medium / Low (press Down)
 - Edge server override for outages (press Down)
 - Quality and server preferences persist across sessions
+- Automatic token refresh (every 25 min) with auto-retry on stream errors
+- Manual token refresh via options menu
 
 <img src="docs/login.jpg" width="400" alt="Login Screen" />
 <img src="docs/cam-grid.jpg" width="400" alt="Camera Grid" />
@@ -30,7 +32,7 @@ Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first beca
 |--------|--------|
 | Arrow keys | Navigate cameras |
 | OK | Open selected camera stream |
-| * (Options) | Log out |
+| * (Options) | Options menu (Refresh Token, Log Out) |
 
 ### Video Player
 | Button | Action |

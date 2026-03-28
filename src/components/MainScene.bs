@@ -69,14 +69,20 @@ sub showScreen(screenName as string)
         m.top.appendChild(m.currentScreen)
         m.currentScreen.setFocus(true)
     else if screenName = "grid"
+        ' Refresh tokens and restart the timer every time we enter the grid.
+        ' Covers app resume from suspend, return from player, etc.
+        refreshTokensInBackground()
+        m.tokenRefreshTimer.control = "start"
         m.currentScreen = createObject("roSGNode", "GridScreen")
         m.currentScreen.observeField("streamSelected", "onStreamSelected")
         m.currentScreen.observeField("logout", "onLogout")
+        m.currentScreen.observeField("requestRefresh", "onGridRequestRefresh")
         m.top.appendChild(m.currentScreen)
         m.currentScreen.setFocus(true)
     else if screenName = "player"
         m.currentScreen = createObject("roSGNode", "PlayerScreen")
         m.currentScreen.observeField("close", "onPlayerClose")
+        m.currentScreen.observeField("requestRefresh", "onPlayerRequestRefresh")
         m.top.appendChild(m.currentScreen)
         m.currentScreen.cameraList = m.cameraListContent
         m.currentScreen.streamContent = m.selectedStream
@@ -103,19 +109,36 @@ sub onStreamSelected()
     showScreen("player")
 end sub
 
+' Called when the grid's Refresh button is pressed
+sub onGridRequestRefresh()
+    print "[MainScene] Grid requested token refresh"
+    refreshTokensInBackground()
+end sub
+
+' Called when the player requests a token refresh (auto-retry or manual * press)
+sub onPlayerRequestRefresh()
+    print "[MainScene] Player requested token refresh"
+    refreshTokensInBackground()
+end sub
+
 ' Called when the player is closed (back button)
 sub onPlayerClose()
     print "[MainScene] Player closed, returning to grid"
     showScreen("grid")
 end sub
 
-' Fires every 25 minutes to refresh auth tokens before the 30-minute JWT expiry
-sub onTokenRefreshTimer()
+' Runs AuthTask validate in the background to get fresh tokens
+sub refreshTokensInBackground()
     print "[MainScene] Refreshing auth tokens..."
     m.refreshAuthTask = createObject("roSGNode", "AuthTask")
     m.refreshAuthTask.action = "validate"
     m.refreshAuthTask.observeField("success", "onTokenRefreshResult")
     m.refreshAuthTask.control = "run"
+end sub
+
+' Fires every 25 minutes to refresh auth tokens before the 30-minute JWT expiry
+sub onTokenRefreshTimer()
+    refreshTokensInBackground()
 end sub
 
 ' Called when the token refresh completes

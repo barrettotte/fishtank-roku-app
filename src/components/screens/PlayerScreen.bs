@@ -20,6 +20,7 @@ sub init()
     m.currentTitle = ""
     m.qualityDialog = invalid
     m.cameraOverlay = invalid
+    m.hasRetried = false
 
     print "[PlayerScreen] Ready"
 end sub
@@ -137,28 +138,48 @@ sub onVideoStateChanged()
     print "[PlayerScreen] Video state: " + state
 
     if state = "playing"
+        m.hasRetried = false
         m.statusLabel.visible = false
     else if state = "buffering"
         m.statusLabel.text = "Buffering..."
         m.statusLabel.visible = true
-    else if state = "error"
-        errorCode = m.videoPlayer.errorCode
-        errorMsg = m.videoPlayer.errorMsg
-        print "[PlayerScreen] Error code: " + errorCode.toStr()
-        print "[PlayerScreen] Error msg: " + errorMsg
-
-        ' Show a helpful message based on error type
-        if errorCode = -4 or errorCode = -1
-            m.statusLabel.text = "Stream unavailable. It may be offline"
-        else if errorCode = -3
-            m.statusLabel.text = "Network error. Check your connection"
+    else if state = "error" or state = "finished"
+        if state = "error"
+            errorCode = m.videoPlayer.errorCode
+            errorMsg = m.videoPlayer.errorMsg
+            print "[PlayerScreen] Error code: " + errorCode.toStr()
+            print "[PlayerScreen] Error msg: " + errorMsg
         else
-            m.statusLabel.text = "Playback error (" + errorCode.toStr() + ")"
+            print "[PlayerScreen] Stream finished"
         end if
+
+        ' Auto-retry once by refreshing tokens and rebuilding the stream URL.
+        ' Covers expired JWT, server rotation, and transient errors.
+        if not m.hasRetried
+            m.hasRetried = true
+            m.statusLabel.text = "Retrying..."
+            m.statusLabel.color = COLOR_WHITE
+            m.statusLabel.visible = true
+            print "[PlayerScreen] Auto-retrying with token refresh..."
+            m.top.requestRefresh = true
+            return
+        end if
+
+        ' Already retried, show the error
+        if state = "error"
+            errorCode = m.videoPlayer.errorCode
+            if errorCode = -4 or errorCode = -1
+                m.statusLabel.text = "Stream unavailable. It may be offline"
+            else if errorCode = -3
+                m.statusLabel.text = "Network error. Check your connection"
+            else
+                m.statusLabel.text = "Playback error (" + errorCode.toStr() + ")"
+            end if
+        else
+            m.statusLabel.text = "Stream ended"
+        end if
+        m.statusLabel.text = m.statusLabel.text + " (press Back and try again)"
         m.statusLabel.color = COLOR_DANGER
-        m.statusLabel.visible = true
-    else if state = "finished"
-        m.statusLabel.text = "Stream ended"
         m.statusLabel.visible = true
     end if
 end sub
