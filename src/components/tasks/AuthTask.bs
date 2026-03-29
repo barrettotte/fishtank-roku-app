@@ -13,6 +13,8 @@ sub execute()
         doLogin()
     else if action = "validate"
         doValidate()
+    else if action = "refresh"
+        doRefresh()
     else
         print "[AuthTask] Unknown action: " + action
     end if
@@ -27,6 +29,23 @@ sub doLogin()
 
     response = httpPost(url, body)
     handleAuthResponse(response)
+end sub
+
+' Re-logins using stored encrypted credentials to get a fresh live_stream_token.
+' Falls back to validate if no credentials are stored.
+sub doRefresh()
+    email = getEmail()
+    password = getPassword()
+
+    if email <> "" and password <> ""
+        print "[AuthTask] Refreshing via re-login..."
+        m.top.email = email
+        m.top.password = password
+        doLogin()
+    else
+        print "[AuthTask] No stored credentials, falling back to validate"
+        doValidate()
+    end if
 end sub
 
 ' Validates an existing access token via GET /auth and refreshes tokens

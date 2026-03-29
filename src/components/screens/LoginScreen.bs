@@ -133,6 +133,8 @@ end sub
 sub onLoginSuccess()
     if m.authTask.success
         setStatus("Login successful!", COLOR_ACCENT)
+        ' Save encrypted credentials for background token refresh (re-login)
+        saveCredentials(m.email, m.password)
         m.top.loginSuccess = m.authTask.session
     end if
     m.password = ""

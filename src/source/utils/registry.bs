@@ -76,17 +76,75 @@ function getServer() as string
     return "auto"
 end function
 
+' Saves login credentials encrypted with roDeviceCrypto (channel-scoped key)
+sub saveCredentials(email as string, password as string)
+    crypto = createObject("roDeviceCrypto")
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+
+    emailBytes = createObject("roByteArray")
+    emailBytes.fromAsciiString(email)
+    encEmail = crypto.encrypt(emailBytes, "channel")
+
+    passBytes = createObject("roByteArray")
+    passBytes.fromAsciiString(password)
+    encPass = crypto.encrypt(passBytes, "channel")
+
+    sec.write(REGISTRY_EMAIL, encEmail.toBase64String())
+    sec.write(REGISTRY_PASSWORD, encPass.toBase64String())
+    sec.flush()
+    print "[Auth] Credentials saved (encrypted)"
+end sub
+
+' Reads and decrypts the stored email. Returns empty string if not found
+function getEmail() as string
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    if not sec.exists(REGISTRY_EMAIL)
+        return ""
+    end if
+    crypto = createObject("roDeviceCrypto")
+    encBytes = createObject("roByteArray")
+    encBytes.fromBase64String(sec.read(REGISTRY_EMAIL))
+    decBytes = crypto.decrypt(encBytes, "channel")
+    if decBytes = invalid
+        return ""
+    end if
+    return decBytes.toAsciiString()
+end function
+
+' Reads and decrypts the stored password. Returns empty string if not found
+function getPassword() as string
+    sec = createObject("roRegistrySection", REGISTRY_SECTION)
+    if not sec.exists(REGISTRY_PASSWORD)
+        return ""
+    end if
+    crypto = createObject("roDeviceCrypto")
+    encBytes = createObject("roByteArray")
+    encBytes.fromBase64String(sec.read(REGISTRY_PASSWORD))
+    decBytes = crypto.decrypt(encBytes, "channel")
+    if decBytes = invalid
+        return ""
+    end if
+    return decBytes.toAsciiString()
+end function
+
+' Returns true if encrypted credentials are stored
+function hasCredentials() as boolean
+    return getEmail() <> "" and getPassword() <> ""
+end function
+
 ' Returns true if both tokens exist in the registry
 function hasTokens() as boolean
     return getAccessToken() <> "" and getLiveStreamToken() <> ""
 end function
 
-' Deletes all stored tokens from the registry
+' Deletes all stored tokens and credentials from the registry
 sub clearTokens()
     sec = createObject("roRegistrySection", REGISTRY_SECTION)
     sec.delete(REGISTRY_ACCESS_TOKEN)
     sec.delete(REGISTRY_LIVE_STREAM_TOKEN)
     sec.delete(REGISTRY_DISPLAY_NAME)
+    sec.delete(REGISTRY_EMAIL)
+    sec.delete(REGISTRY_PASSWORD)
     sec.flush()
-    print "[Auth] Tokens cleared from registry"
+    print "[Auth] Tokens and credentials cleared from registry"
 end sub

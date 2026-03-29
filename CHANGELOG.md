@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.4
+
+Adds encrypted email/password to handle token refresh without re-login.
+
 ## v0.1.3
 
 Fixes stale token on Roku sleep and adds manual token refresh option.

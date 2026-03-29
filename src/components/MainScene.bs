@@ -127,11 +127,11 @@ sub onPlayerClose()
     showScreen("grid")
 end sub
 
-' Runs AuthTask validate in the background to get fresh tokens
+' Re-logins with stored credentials to get a fresh live_stream_token
 sub refreshTokensInBackground()
     print "[MainScene] Refreshing auth tokens..."
     m.refreshAuthTask = createObject("roSGNode", "AuthTask")
-    m.refreshAuthTask.action = "validate"
+    m.refreshAuthTask.action = "refresh"
     m.refreshAuthTask.observeField("success", "onTokenRefreshResult")
     m.refreshAuthTask.control = "run"
 end sub

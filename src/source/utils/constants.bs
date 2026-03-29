@@ -41,6 +41,8 @@ const REGISTRY_SECTION = "FishtankAuth"
 const REGISTRY_ACCESS_TOKEN = "access_token"
 const REGISTRY_LIVE_STREAM_TOKEN = "live_stream_token"
 const REGISTRY_DISPLAY_NAME = "display_name"
+const REGISTRY_EMAIL = "email"
+const REGISTRY_PASSWORD = "password"
 const REGISTRY_QUALITY = "quality"
 const REGISTRY_SERVER = "server"
 
