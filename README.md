@@ -61,7 +61,18 @@ Check agathanon's repo/app https://github.com/agathanon/fishtank-roku first beca
 
 ### Credential Storage
 
-Login credentials are encrypted using [`roDeviceCrypto`](https://developer.roku.com/docs/references/brightscript/components/rodevicecrypto.md) with a channel-scoped hardware key and stored in the Roku registry. This allows the app to re-login automatically in the background to refresh the stream token (JWT), which expires every 30 minutes. Only your app on your device can decrypt the credentials.
+All sensitive data stored in the Roku registry is encrypted using [`roDeviceCrypto`](https://developer.roku.com/docs/references/brightscript/components/rodevicecrypto.md) with a channel-scoped hardware key. Only your app on your device can decrypt the data.
+
+| Data | Encrypted | Purpose |
+|------|-----------|---------|
+| Email | Yes | Background re-login for token refresh |
+| Password | Yes | Background re-login for token refresh |
+| Access Token | Yes | REST API authentication |
+| Live Stream Token | Yes | HLS stream URL JWT parameter |
+| Display Name | No | Shown in header (non-sensitive) |
+| Quality / Server | No | User preferences (non-sensitive) |
+
+Credentials are stored to allow the app to re-login automatically in the background to refresh the stream token (JWT), which expires every 30 minutes.
 
 > **Roku Channel Store note:** Roku's [certification criteria](https://developer.roku.com/docs/developer-program/certification/overview.md) prohibit storing customer personal information (including email/password) in the device registry, even encrypted. This app stores encrypted credentials purely for background token refresh and is intended for sideloading only. To comply with Roku certification, this would need to be replaced with a server-side token refresh proxy or prompting the user to re-login when the token expires.
 

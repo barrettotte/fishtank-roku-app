@@ -1,12 +1,22 @@
 ' Registry helpers for persisting app state (auth tokens, preferences)
 
-' Saves the access token and live stream token to the registry
+' Saves the access token and live stream token encrypted to the registry
 sub saveTokens(accessToken as string, liveStreamToken as string)
+    crypto = createObject("roDeviceCrypto")
     sec = createObject("roRegistrySection", REGISTRY_SECTION)
-    sec.write(REGISTRY_ACCESS_TOKEN, accessToken)
-    sec.write(REGISTRY_LIVE_STREAM_TOKEN, liveStreamToken)
+
+    atBytes = createObject("roByteArray")
+    atBytes.fromAsciiString(accessToken)
+    sec.write(REGISTRY_ACCESS_TOKEN, crypto.encrypt(atBytes, "channel").toBase64String())
+
+    if liveStreamToken <> ""
+        lstBytes = createObject("roByteArray")
+        lstBytes.fromAsciiString(liveStreamToken)
+        sec.write(REGISTRY_LIVE_STREAM_TOKEN, crypto.encrypt(lstBytes, "channel").toBase64String())
+    end if
+
     sec.flush()
-    print "[Auth] Tokens saved to registry"
+    print "[Auth] Tokens saved to registry (encrypted)"
 end sub
 
 ' Saves the display name to the registry
@@ -26,22 +36,36 @@ function getDisplayName() as string
     return ""
 end function
 
-' Reads the access token from the registry. Returns empty string if not found
+' Reads and decrypts the access token from the registry. Returns empty string if not found
 function getAccessToken() as string
     sec = createObject("roRegistrySection", REGISTRY_SECTION)
-    if sec.exists(REGISTRY_ACCESS_TOKEN)
-        return sec.read(REGISTRY_ACCESS_TOKEN)
+    if not sec.exists(REGISTRY_ACCESS_TOKEN)
+        return ""
     end if
-    return ""
+    crypto = createObject("roDeviceCrypto")
+    encBytes = createObject("roByteArray")
+    encBytes.fromBase64String(sec.read(REGISTRY_ACCESS_TOKEN))
+    decBytes = crypto.decrypt(encBytes, "channel")
+    if decBytes = invalid
+        return ""
+    end if
+    return decBytes.toAsciiString()
 end function
 
-' Reads the live stream token from the registry. Returns empty string if not found
+' Reads and decrypts the live stream token from the registry. Returns empty string if not found
 function getLiveStreamToken() as string
     sec = createObject("roRegistrySection", REGISTRY_SECTION)
-    if sec.exists(REGISTRY_LIVE_STREAM_TOKEN)
-        return sec.read(REGISTRY_LIVE_STREAM_TOKEN)
+    if not sec.exists(REGISTRY_LIVE_STREAM_TOKEN)
+        return ""
     end if
-    return ""
+    crypto = createObject("roDeviceCrypto")
+    encBytes = createObject("roByteArray")
+    encBytes.fromBase64String(sec.read(REGISTRY_LIVE_STREAM_TOKEN))
+    decBytes = crypto.decrypt(encBytes, "channel")
+    if decBytes = invalid
+        return ""
+    end if
+    return decBytes.toAsciiString()
 end function
 
 ' Saves the preferred quality to the registry

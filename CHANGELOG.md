@@ -1,5 +1,9 @@
 # Changelog
 
+## v0.1.5
+
+Adds encryption to live stream and access tokens.
+
 ## v0.1.4
 
 Adds encrypted email/password to handle token refresh without re-login.

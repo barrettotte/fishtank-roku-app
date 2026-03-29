@@ -62,7 +62,7 @@ sub onEmailEntered()
         return
     end if
 
-    print "[LoginScreen] Email entered: " + m.email
+    print "[LoginScreen] Email entered"
     showPasswordKeyboard()
 end sub
 

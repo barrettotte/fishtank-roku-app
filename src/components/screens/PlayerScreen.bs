@@ -71,7 +71,8 @@ sub onStreamContentChanged()
     streamUrl = streamUrl + "?jwt=" + liveStreamToken
     streamUrl = streamUrl + "&video=" + m.quality
 
-    print "[PlayerScreen] URL: " + streamUrl
+    ' Log URL without the JWT for security (visible via telnet)
+    print "[PlayerScreen] URL: " + "https://" + server + HLS_PATH_PREFIX + streamId + HLS_INDEX_FILE + "?jwt=***&video=" + m.quality
 
     ' Set up the video node
     videoContent = createObject("roSGNode", "ContentNode")
